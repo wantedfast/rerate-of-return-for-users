@@ -22,59 +22,56 @@ async function listen(app) {
   return server;
 }
 
-test("default data derives cash balances from total capital targets and fee deductions", async () => {
-  const summary = calculateSummary(await readDefaultData());
-  const totals = Object.fromEntries(summary.map((row) => [row.personName, roundCurrency(row.totalProfit)]));
+function byId(summary) {
+  return Object.fromEntries(summary.map((row) => [row.personId, row]));
+}
 
-  assert.deepEqual(totals, {
-    王欣隆: -1433.03,
-    chen: -1195.58,
-    南京哥: -1673.81,
-    garlicm: -171.97,
-    糖: -2592.2
-  });
+test("default data derives cash balances, fees, and US liquidation adjustment", async () => {
+  const rows = byId(calculateSummary(await readDefaultData()));
 
-  const garlicm = summary.find((row) => row.personId === "garlicm");
-  const sugar = summary.find((row) => row.personId === "sugar");
-  assert.equal(roundCurrency(garlicm.targetCapital), 20000);
-  assert.equal(roundCurrency(garlicm.cashBalance), 1606.79);
-  assert.equal(garlicm.fee, 100);
-  assert.equal(roundCurrency(sugar.targetCapital), 20000);
-  assert.equal(roundCurrency(sugar.cashBalance), 1686.5);
-  assert.equal(sugar.fee, 200);
+  assert.equal(roundCurrency(rows.wang.totalProfit), -1433.03);
+  assert.equal(roundCurrency(rows.chen.totalProfit), -1195.58);
+  assert.equal(roundCurrency(rows.nanjing.totalProfit), -1673.81);
+  assert.equal(roundCurrency(rows.garlicm.totalProfit), -171.97);
+  assert.equal(roundCurrency(rows.sugar.totalProfit), -4092.2);
+
+  assert.equal(roundCurrency(rows.garlicm.targetCapital), 20000);
+  assert.equal(roundCurrency(rows.garlicm.cashBalance), 1606.79);
+  assert.equal(rows.garlicm.fee, 100);
+
+  assert.equal(roundCurrency(rows.sugar.targetCapital), 20000);
+  assert.equal(roundCurrency(rows.sugar.investedCapital), 19813.5);
+  assert.equal(roundCurrency(rows.sugar.cashBalance), 186.5);
+  assert.equal(roundCurrency(rows.sugar.usProfit), -3823.12);
+  assert.equal(rows.sugar.fee, 200);
 });
 
 test("us principal is stored as JPY and converted to CNY capital", async () => {
   const data = await readDefaultData();
-  const summary = calculateSummary(data);
+  const rows = byId(calculateSummary(data));
   const totals = calculateAll(data).totals;
 
   assert.equal(data.assetSnapshots.usStock.principalJpy, 970000);
-  assert.equal(roundCurrency(totals.usProfit), -5629.05);
-  assert.equal(roundCurrency(summary.find((row) => row.personId === "sugar").capital), 20000);
+  assert.equal(roundCurrency(totals.usProfit), -7129.05);
+  assert.equal(roundCurrency(rows.sugar.capital), 20000);
 });
 
 test("fund current asset only changes common pool fund allocation", async () => {
   const data = await readDefaultData();
-  const base = calculateSummary(data);
-  const changed = calculateSummary({
+  const base = byId(calculateSummary(data));
+  const changed = byId(calculateSummary({
     ...data,
     assetSnapshots: {
       ...data.assetSnapshots,
       fund: { ...data.assetSnapshots.fund, currentAssetCny: 5100 }
     }
-  });
+  }));
 
   for (const personId of ["garlicm", "sugar"]) {
-    const before = base.find((row) => row.personId === personId);
-    const after = changed.find((row) => row.personId === personId);
-    assert.equal(roundCurrency(before.fundProfit), roundCurrency(after.fundProfit));
+    assert.equal(roundCurrency(base[personId].fundProfit), roundCurrency(changed[personId].fundProfit));
   }
 
-  assert.notEqual(
-    roundCurrency(base.find((row) => row.personId === "wang").fundProfit),
-    roundCurrency(changed.find((row) => row.personId === "wang").fundProfit)
-  );
+  assert.notEqual(roundCurrency(base.wang.fundProfit), roundCurrency(changed.wang.fundProfit));
 });
 
 test("post-market deposit starts participating from the next A-share record", () => {

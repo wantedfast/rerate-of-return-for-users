@@ -13,6 +13,12 @@
     "garlicm": 100,
     "sugar": 200
   },
+  "usAdjustments": {
+    "sugar": {
+      "capitalCny": 1500,
+      "profitCny": -1500
+    }
+  },
   "assetSnapshots": {
     "usStock": {
       "principalJpy": 970000,

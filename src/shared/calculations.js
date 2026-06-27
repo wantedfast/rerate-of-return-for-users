@@ -33,12 +33,23 @@ function normalizeByPerson(source = {}) {
   return Object.fromEntries(PERSON_IDS.map((personId) => [personId, numberOrZero(source[personId])]));
 }
 
+function normalizeAdjustments(source = {}) {
+  return Object.fromEntries(PERSON_IDS.map((personId) => {
+    const row = source[personId] ?? {};
+    return [personId, {
+      capitalCny: numberOrZero(row.capitalCny),
+      profitCny: numberOrZero(row.profitCny)
+    }];
+  }));
+}
+
 export function normalizeInvestmentData(input = {}) {
   const assetSnapshots = input.assetSnapshots ?? {};
   return {
     totalCapitalTargets: normalizeByPerson(input.totalCapitalTargets),
     cashBalances: normalizeByPerson(input.cashBalances),
     fees: normalizeByPerson(input.fees),
+    usAdjustments: normalizeAdjustments(input.usAdjustments),
     assetSnapshots: {
       usStock: {
         principalJpy: numberOrZero(assetSnapshots.usStock?.principalJpy),
@@ -252,10 +263,15 @@ export function calculateUsStocks(input) {
   const totalProfit = (
     numberOrZero(data.assetSnapshots.usStock.currentAssetJpy) - numberOrZero(data.assetSnapshots.usStock.principalJpy)
   ) * numberOrZero(data.assetSnapshots.usStock.jpyCnyRate);
+  const byPerson = allocateProfit(totalProfit, capitalByPerson);
+  for (const personId of PERSON_IDS) {
+    capitalByPerson[personId] += data.usAdjustments[personId].capitalCny;
+    byPerson[personId] += data.usAdjustments[personId].profitCny;
+  }
   return {
-    byPerson: allocateProfit(totalProfit, capitalByPerson),
+    byPerson,
     capitalByPerson,
-    totalProfit
+    totalProfit: PERSON_IDS.reduce((sum, personId) => sum + byPerson[personId], 0)
   };
 }
 
