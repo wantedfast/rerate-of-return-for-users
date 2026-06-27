@@ -220,7 +220,7 @@ function AdminPage({ user, onLogout }) {
           </section>
 
           <AssetEditor data={payload.data} setData={setData} />
-          <CashFeeEditor data={payload.data} setData={setData} people={payload.meta.people} />
+          <CapitalFeeEditor data={payload.data} setData={setData} people={payload.meta.people} />
           <SummaryTable rows={payload.results.summary} />
           <SplitDetails results={payload.results} />
           <FlowEditor data={payload.data} setData={setData} />
@@ -291,7 +291,7 @@ function AssetEditor({ data, setData }) {
   );
 }
 
-function CashFeeEditor({ data, setData, people }) {
+function CapitalFeeEditor({ data, setData, people }) {
   function update(bucket, personId, value) {
     setData((current) => {
       const next = structuredClone(current);
@@ -303,13 +303,13 @@ function CashFeeEditor({ data, setData, people }) {
 
   return (
     <section className="panel">
-      <h2>现金余额 / 手续费</h2>
+      <h2>总资金 / 手续费</h2>
       <div className="table-wrap">
         <table>
           <thead>
             <tr>
               <th>人</th>
-              <th>现金余额 CNY</th>
+              <th>总资金 CNY</th>
               <th>手续费 CNY</th>
             </tr>
           </thead>
@@ -317,7 +317,7 @@ function CashFeeEditor({ data, setData, people }) {
             {people.map((person) => (
               <tr key={person.id}>
                 <td>{person.name}</td>
-                <td><input type="number" value={data.cashBalances?.[person.id] ?? 0} onChange={(event) => update("cashBalances", person.id, event.target.value)} /></td>
+                <td><input type="number" value={data.totalCapitalTargets?.[person.id] ?? 0} onChange={(event) => update("totalCapitalTargets", person.id, event.target.value)} /></td>
                 <td><input type="number" value={data.fees?.[person.id] ?? 0} onChange={(event) => update("fees", person.id, event.target.value)} /></td>
               </tr>
             ))}

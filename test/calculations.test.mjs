@@ -22,7 +22,7 @@ async function listen(app) {
   return server;
 }
 
-test("default data includes cash balances and fee deductions", async () => {
+test("default data derives cash balances from total capital targets and fee deductions", async () => {
   const summary = calculateSummary(await readDefaultData());
   const totals = Object.fromEntries(summary.map((row) => [row.personName, roundCurrency(row.totalProfit)]));
 
@@ -36,9 +36,11 @@ test("default data includes cash balances and fee deductions", async () => {
 
   const garlicm = summary.find((row) => row.personId === "garlicm");
   const sugar = summary.find((row) => row.personId === "sugar");
-  assert.equal(garlicm.cashBalance, 20000);
+  assert.equal(roundCurrency(garlicm.targetCapital), 20000);
+  assert.equal(roundCurrency(garlicm.cashBalance), 1606.79);
   assert.equal(garlicm.fee, 100);
-  assert.equal(sugar.cashBalance, 20000);
+  assert.equal(roundCurrency(sugar.targetCapital), 20000);
+  assert.equal(roundCurrency(sugar.cashBalance), 1686.5);
   assert.equal(sugar.fee, 200);
 });
 
@@ -49,7 +51,7 @@ test("us principal is stored as JPY and converted to CNY capital", async () => {
 
   assert.equal(data.assetSnapshots.usStock.principalJpy, 970000);
   assert.equal(roundCurrency(totals.usProfit), -5629.05);
-  assert.equal(roundCurrency(summary.find((row) => row.personId === "sugar").capital), 38313.5);
+  assert.equal(roundCurrency(summary.find((row) => row.personId === "sugar").capital), 20000);
 });
 
 test("fund current asset only changes common pool fund allocation", async () => {

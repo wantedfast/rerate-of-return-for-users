@@ -36,6 +36,7 @@ function normalizeByPerson(source = {}) {
 export function normalizeInvestmentData(input = {}) {
   const assetSnapshots = input.assetSnapshots ?? {};
   return {
+    totalCapitalTargets: normalizeByPerson(input.totalCapitalTargets),
     cashBalances: normalizeByPerson(input.cashBalances),
     fees: normalizeByPerson(input.fees),
     assetSnapshots: {
@@ -273,17 +274,21 @@ export function calculateSummary(input) {
     const aShareProfit = ashare.byPerson[personId] ?? 0;
     const fundProfit = fund.byPerson[personId] ?? 0;
     const usProfit = us.byPerson[personId] ?? 0;
-    const cashBalance = data.cashBalances[personId] ?? 0;
+    const investedCapital = capitalByAsset.ashare[personId] + capitalByAsset.fund[personId] + capitalByAsset.us[personId];
+    const targetCapital = data.totalCapitalTargets[personId] ?? 0;
+    const cashBalance = targetCapital > 0 ? targetCapital - investedCapital : data.cashBalances[personId] ?? 0;
     const fee = data.fees[personId] ?? 0;
     const investmentProfit = aShareProfit + fundProfit + usProfit;
     const totalProfit = investmentProfit - fee;
-    const capital = capitalByAsset.ashare[personId] + capitalByAsset.fund[personId] + capitalByAsset.us[personId] + cashBalance;
+    const capital = investedCapital + cashBalance;
     return {
       personId,
       personName: PERSON_NAME_BY_ID[personId] ?? personId,
       aShareProfit,
       fundProfit,
       usProfit,
+      investedCapital,
+      targetCapital,
       cashBalance,
       fee,
       investmentProfit,
