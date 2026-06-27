@@ -13,6 +13,14 @@ function numberOrZero(value) {
   return Number.isFinite(numeric) ? numeric : 0;
 }
 
+function numberOrNull(value) {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
 function zeroByPerson() {
   return Object.fromEntries(PERSON_IDS.map((personId) => [personId, 0]));
 }
@@ -43,13 +51,100 @@ function normalizeAdjustments(source = {}) {
   }));
 }
 
+function normalizeDailyBalances(input, assetSnapshots) {
+  const legacyAshareRows = assetSnapshots.aShareDaily ?? [];
+  const sourceRows = Array.isArray(input.dailyBalances) && input.dailyBalances.length
+    ? input.dailyBalances
+    : legacyAshareRows.map((row) => ({
+        id: row.id,
+        date: row.date,
+        ashareTotalCny: row.totalCny,
+        usCurrentJpy: null,
+        jpyCnyRate: null,
+        fundCurrentCny: null
+      }));
+
+  return sourceRows
+    .map((row, index) => ({
+      id: row.id ?? `daily-${index + 1}`,
+      date: String(row.date ?? ""),
+      ashareTotalCny: numberOrNull(row.ashareTotalCny),
+      usCurrentJpy: numberOrNull(row.usCurrentJpy),
+      jpyCnyRate: numberOrNull(row.jpyCnyRate),
+      fundCurrentCny: numberOrNull(row.fundCurrentCny)
+    }))
+    .filter((row) => row.date)
+    .sort((a, b) => compareDate(a.date, b.date));
+}
+
+function withCarriedBalances(dailyBalances) {
+  let lastAshareTotalCny = null;
+  let lastUsCurrentJpy = null;
+  let lastJpyCnyRate = null;
+  let lastFundCurrentCny = null;
+
+  return dailyBalances.map((row) => {
+    if (row.ashareTotalCny !== null) lastAshareTotalCny = row.ashareTotalCny;
+    if (row.usCurrentJpy !== null) lastUsCurrentJpy = row.usCurrentJpy;
+    if (row.jpyCnyRate !== null) lastJpyCnyRate = row.jpyCnyRate;
+    if (row.fundCurrentCny !== null) lastFundCurrentCny = row.fundCurrentCny;
+
+    return {
+      ...row,
+      effectiveAshareTotalCny: lastAshareTotalCny,
+      effectiveUsCurrentJpy: lastUsCurrentJpy,
+      effectiveJpyCnyRate: lastJpyCnyRate,
+      effectiveFundCurrentCny: lastFundCurrentCny
+    };
+  });
+}
+
+function latestEffectiveDailyBalance(data) {
+  return data.dailyBalancesWithCarry.at(-1) ?? {
+    effectiveAshareTotalCny: null,
+    effectiveUsCurrentJpy: null,
+    effectiveJpyCnyRate: null,
+    effectiveFundCurrentCny: null
+  };
+}
+
+function latestUsRate(data) {
+  return latestEffectiveDailyBalance(data).effectiveJpyCnyRate
+    ?? numberOrZero(data.assetSnapshots.usStock.jpyCnyRate);
+}
+
+function latestUsCurrentJpy(data) {
+  return latestEffectiveDailyBalance(data).effectiveUsCurrentJpy
+    ?? numberOrZero(data.assetSnapshots.usStock.currentAssetJpy);
+}
+
+function latestFundCurrentCny(data) {
+  return latestEffectiveDailyBalance(data).effectiveFundCurrentCny
+    ?? numberOrZero(data.assetSnapshots.fund.currentAssetCny);
+}
+
+function getAshareRows(data) {
+  const rows = data.dailyBalancesWithCarry
+    .filter((row) => row.effectiveAshareTotalCny !== null)
+    .map((row) => ({
+      id: row.id,
+      date: row.date,
+      totalCny: row.effectiveAshareTotalCny,
+      profit: null
+    }));
+  return rows.length ? rows : data.assetSnapshots.aShareDaily;
+}
+
 export function normalizeInvestmentData(input = {}) {
   const assetSnapshots = input.assetSnapshots ?? {};
+  const dailyBalances = normalizeDailyBalances(input, assetSnapshots);
   return {
     totalCapitalTargets: normalizeByPerson(input.totalCapitalTargets),
     cashBalances: normalizeByPerson(input.cashBalances),
     fees: normalizeByPerson(input.fees),
     usAdjustments: normalizeAdjustments(input.usAdjustments),
+    dailyBalances,
+    dailyBalancesWithCarry: withCarriedBalances(dailyBalances),
     assetSnapshots: {
       usStock: {
         principalJpy: numberOrZero(assetSnapshots.usStock?.principalJpy),
@@ -91,7 +186,7 @@ export function normalizeInvestmentData(input = {}) {
 }
 
 export function getRecordDates(data) {
-  return [...new Set((data.assetSnapshots.aShareDaily ?? []).map((row) => row.date))].sort(compareDate);
+  return [...new Set(getAshareRows(data).map((row) => row.date))].sort(compareDate);
 }
 
 export function resolveEffectiveDate(flow, recordDates) {
@@ -171,7 +266,7 @@ export function calculateAshareTimeline(input) {
   const rows = [];
   let previousTotal = 0;
 
-  for (const row of data.assetSnapshots.aShareDaily) {
+  for (const row of getAshareRows(data)) {
     const flows = groupedFlows.get(row.date) ?? [];
     const deposits = flows.filter((flow) => flow.type === "deposit").reduce((sum, flow) => sum + numberOrZero(flow.amount), 0);
     const withdrawals = flows.filter((flow) => flow.type === "withdrawal").reduce((sum, flow) => sum + numberOrZero(flow.amount), 0);
@@ -225,7 +320,7 @@ export function calculateAshareTimeline(input) {
 export function calculateAssetCapital(input, assetType) {
   const data = normalizeInvestmentData(input);
   const capital = zeroByPerson();
-  const rate = assetType === "us" ? numberOrZero(data.assetSnapshots.usStock.jpyCnyRate) : 1;
+  const rate = assetType === "us" ? latestUsRate(data) : 1;
   for (const flow of getEffectiveFlows(data)) {
     if (flow.assetType !== assetType) {
       continue;
@@ -249,7 +344,7 @@ function allocateProfit(totalProfit, capitalByPerson) {
 export function calculateFund(input) {
   const data = normalizeInvestmentData(input);
   const capitalByPerson = calculateAssetCapital(data, "fund");
-  const totalProfit = numberOrZero(data.assetSnapshots.fund.currentAssetCny) - numberOrZero(data.assetSnapshots.fund.principalCny);
+  const totalProfit = latestFundCurrentCny(data) - numberOrZero(data.assetSnapshots.fund.principalCny);
   return {
     byPerson: allocateProfit(totalProfit, capitalByPerson),
     capitalByPerson,
@@ -261,8 +356,8 @@ export function calculateUsStocks(input) {
   const data = normalizeInvestmentData(input);
   const capitalByPerson = calculateAssetCapital(data, "us");
   const totalProfit = (
-    numberOrZero(data.assetSnapshots.usStock.currentAssetJpy) - numberOrZero(data.assetSnapshots.usStock.principalJpy)
-  ) * numberOrZero(data.assetSnapshots.usStock.jpyCnyRate);
+    latestUsCurrentJpy(data) - numberOrZero(data.assetSnapshots.usStock.principalJpy)
+  ) * latestUsRate(data);
   const byPerson = allocateProfit(totalProfit, capitalByPerson);
   for (const personId of PERSON_IDS) {
     capitalByPerson[personId] += data.usAdjustments[personId].capitalCny;

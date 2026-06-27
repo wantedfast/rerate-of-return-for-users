@@ -225,7 +225,6 @@ function AdminPage({ user, onLogout }) {
           <SplitDetails results={payload.results} />
           <FlowEditor data={payload.data} setData={setData} />
           <FlowDetails flows={payload.results.flowDetails} />
-          <AshareTimeline data={payload.data} setData={setData} />
         </>
       )}
     </main>
@@ -258,6 +257,102 @@ function Metric({ label, value, tone }) {
 }
 
 function AssetEditor({ data, setData }) {
+  const dailyBalances = data.dailyBalances ?? [];
+
+  function updateSnapshot(path, value) {
+    setData((current) => {
+      const next = structuredClone(current);
+      const [section, key] = path;
+      next.assetSnapshots = next.assetSnapshots ?? {};
+      next.assetSnapshots[section] = next.assetSnapshots[section] ?? {};
+      next.assetSnapshots[section][key] = Number(value);
+      return next;
+    });
+  }
+
+  function parseOptionalNumber(value) {
+    return value === "" ? null : Number(value);
+  }
+
+  function updateDaily(index, key, value) {
+    setData((current) => {
+      const next = structuredClone(current);
+      next.dailyBalances = next.dailyBalances ?? [];
+      next.dailyBalances[index][key] = key === "date" ? value : parseOptionalNumber(value);
+      return next;
+    });
+  }
+
+  function addDailyRow() {
+    setData((current) => {
+      const next = structuredClone(current);
+      next.dailyBalances = next.dailyBalances ?? [];
+      next.dailyBalances.push({
+        id: `daily-${Date.now()}`,
+        date: next.dailyBalances.at(-1)?.date ?? "",
+        ashareTotalCny: null,
+        usCurrentJpy: null,
+        jpyCnyRate: null,
+        fundCurrentCny: null
+      });
+      return next;
+    });
+  }
+
+  function removeDailyRow(index) {
+    setData((current) => {
+      const next = structuredClone(current);
+      next.dailyBalances = (next.dailyBalances ?? []).filter((_, rowIndex) => rowIndex !== index);
+      return next;
+    });
+  }
+
+  return (
+    <section className="panel">
+      <h2>本金设置</h2>
+      <div className="input-grid">
+        <label>美股初始本金 JPY
+          <input type="number" value={data.assetSnapshots.usStock.principalJpy} onChange={(event) => updateSnapshot(["usStock", "principalJpy"], event.target.value)} />
+        </label>
+        <label>基金初始本金 CNY
+          <input type="number" value={data.assetSnapshots.fund.principalCny} onChange={(event) => updateSnapshot(["fund", "principalCny"], event.target.value)} />
+        </label>
+      </div>
+      <div className="section-header">
+        <h2>每日账户余额</h2>
+        <button onClick={addDailyRow}>新增日期</button>
+      </div>
+      <div className="table-wrap">
+        <table className="editable-table">
+          <thead>
+            <tr>
+              <th>日期</th>
+              <th>A股总资产 CNY</th>
+              <th>美股当前资产 JPY</th>
+              <th>JPY/CNY 汇率</th>
+              <th>基金当前资产 CNY</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {dailyBalances.map((row, index) => (
+              <tr key={row.id ?? `${row.date}-${index}`}>
+                <td><input type="date" value={row.date ?? ""} onChange={(event) => updateDaily(index, "date", event.target.value)} /></td>
+                <td><input type="number" value={row.ashareTotalCny ?? ""} onChange={(event) => updateDaily(index, "ashareTotalCny", event.target.value)} /></td>
+                <td><input type="number" value={row.usCurrentJpy ?? ""} onChange={(event) => updateDaily(index, "usCurrentJpy", event.target.value)} /></td>
+                <td><input type="number" step="0.0001" value={row.jpyCnyRate ?? ""} onChange={(event) => updateDaily(index, "jpyCnyRate", event.target.value)} /></td>
+                <td><input type="number" value={row.fundCurrentCny ?? ""} onChange={(event) => updateDaily(index, "fundCurrentCny", event.target.value)} /></td>
+                <td><button className="danger" onClick={() => removeDailyRow(index)}>删除</button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function LegacyAssetEditor({ data, setData }) {
   function update(path, value) {
     setData((current) => {
       const next = structuredClone(current);
@@ -392,7 +487,7 @@ function FlowEditor({ data, setData }) {
         ...current.flows,
         {
           id: `flow-${Date.now()}`,
-          date: current.assetSnapshots.aShareDaily.at(-1)?.date ?? "",
+          date: current.dailyBalances?.at(-1)?.date ?? current.assetSnapshots.aShareDaily.at(-1)?.date ?? "",
           assetType: "ashare",
           type: "deposit",
           amount: 0,

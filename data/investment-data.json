@@ -15,13 +15,31 @@
   },
   "usAdjustments": {
     "sugar": {
-      "capitalCny": 1500,
       "profitCny": -1500
     }
   },
+  "dailyBalances": [
+    { "id": "d-2026-06-01", "date": "2026-06-01", "ashareTotalCny": 26601.37, "usCurrentJpy": null, "jpyCnyRate": null, "fundCurrentCny": null },
+    { "id": "d-2026-06-02", "date": "2026-06-02", "ashareTotalCny": 26868.37, "usCurrentJpy": null, "jpyCnyRate": null, "fundCurrentCny": null },
+    { "id": "d-2026-06-03", "date": "2026-06-03", "ashareTotalCny": 25596.37, "usCurrentJpy": null, "jpyCnyRate": null, "fundCurrentCny": null },
+    { "id": "d-2026-06-04", "date": "2026-06-04", "ashareTotalCny": 26730.37, "usCurrentJpy": null, "jpyCnyRate": null, "fundCurrentCny": null },
+    { "id": "d-2026-06-05", "date": "2026-06-05", "ashareTotalCny": 25528.37, "usCurrentJpy": null, "jpyCnyRate": null, "fundCurrentCny": null },
+    { "id": "d-2026-06-08", "date": "2026-06-08", "ashareTotalCny": 24854.37, "usCurrentJpy": null, "jpyCnyRate": null, "fundCurrentCny": null },
+    { "id": "d-2026-06-09", "date": "2026-06-09", "ashareTotalCny": 25417.37, "usCurrentJpy": null, "jpyCnyRate": null, "fundCurrentCny": null },
+    { "id": "d-2026-06-10", "date": "2026-06-10", "ashareTotalCny": 25290.37, "usCurrentJpy": null, "jpyCnyRate": null, "fundCurrentCny": null },
+    { "id": "d-2026-06-11", "date": "2026-06-11", "ashareTotalCny": 22415.37, "usCurrentJpy": null, "jpyCnyRate": null, "fundCurrentCny": null },
+    { "id": "d-2026-06-12", "date": "2026-06-12", "ashareTotalCny": 20886.37, "usCurrentJpy": null, "jpyCnyRate": null, "fundCurrentCny": null },
+    { "id": "d-2026-06-15", "date": "2026-06-15", "ashareTotalCny": 28697.37, "usCurrentJpy": null, "jpyCnyRate": null, "fundCurrentCny": null },
+    { "id": "d-2026-06-16", "date": "2026-06-16", "ashareTotalCny": 26487.705, "usCurrentJpy": null, "jpyCnyRate": null, "fundCurrentCny": null },
+    { "id": "d-2026-06-17", "date": "2026-06-17", "ashareTotalCny": 24427.04, "usCurrentJpy": null, "jpyCnyRate": null, "fundCurrentCny": null },
+    { "id": "d-2026-06-18", "date": "2026-06-18", "ashareTotalCny": 24157.04, "usCurrentJpy": null, "jpyCnyRate": null, "fundCurrentCny": null },
+    { "id": "d-2026-06-22", "date": "2026-06-22", "ashareTotalCny": 21589.04, "usCurrentJpy": null, "jpyCnyRate": null, "fundCurrentCny": null },
+    { "id": "d-2026-06-23", "date": "2026-06-23", "ashareTotalCny": 21288.04, "usCurrentJpy": null, "jpyCnyRate": null, "fundCurrentCny": null },
+    { "id": "d-2026-06-24", "date": "2026-06-24", "ashareTotalCny": 22476.04, "usCurrentJpy": 835975, "jpyCnyRate": 0.042, "fundCurrentCny": 4965.46 }
+  ],
   "assetSnapshots": {
     "usStock": {
-      "principalJpy": 1004250,
+      "principalJpy": 1039964.2857142857,
       "currentAssetJpy": 835975,
       "jpyCnyRate": 0.042
     },
@@ -68,6 +86,6 @@
     { "id": "flow-16", "date": "2026-06-24", "assetType": "us", "type": "deposit", "amount": 70752.04857150512, "timing": "pre", "holderType": "person", "holderId": "chen" },
     { "id": "flow-17", "date": "2026-06-24", "assetType": "us", "type": "deposit", "amount": 99052.86800010716, "timing": "pre", "holderType": "person", "holderId": "nanjing" },
     { "id": "flow-18", "date": "2026-06-24", "assetType": "us", "type": "deposit", "amount": 234088.22429519845, "timing": "pre", "holderType": "person", "holderId": "garlicm" },
-    { "id": "flow-19", "date": "2026-06-24", "assetType": "us", "type": "deposit", "amount": 400321.43176023575, "timing": "pre", "holderType": "person", "holderId": "sugar" }
+    { "id": "flow-19", "date": "2026-06-24", "assetType": "us", "type": "deposit", "amount": 436035.7174745215, "timing": "pre", "holderType": "person", "holderId": "sugar" }
   ]
 }

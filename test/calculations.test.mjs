@@ -29,22 +29,22 @@ function byId(summary) {
 test("default data derives cash balances, fees, and US liquidation adjustment", async () => {
   const rows = byId(calculateSummary(await readDefaultData()));
 
-  assert.equal(roundCurrency(rows.wang.totalProfit), -1959.94);
-  assert.equal(roundCurrency(rows.chen.totalProfit), -1166.27);
-  assert.equal(roundCurrency(rows.nanjing.totalProfit), -1632.78);
-  assert.equal(roundCurrency(rows.garlicm.totalProfit), -659.71);
-  assert.equal(roundCurrency(rows.sugar.totalProfit), -4586.39);
+  assert.equal(roundCurrency(rows.wang.totalProfit), -2200.12);
+  assert.equal(roundCurrency(rows.chen.totalProfit), -1251.22);
+  assert.equal(roundCurrency(rows.nanjing.totalProfit), -1751.71);
+  assert.equal(roundCurrency(rows.garlicm.totalProfit), -940.77);
+  assert.equal(roundCurrency(rows.sugar.totalProfit), -5361.27);
 
   assert.equal(roundCurrency(rows.garlicm.targetCapital), 20000);
   assert.equal(roundCurrency(rows.garlicm.investedCapital), 19831.71);
   assert.equal(roundCurrency(rows.garlicm.cashBalance), 168.29);
-  assert.equal(roundCurrency(rows.garlicm.usProfit), -1647.43);
+  assert.equal(roundCurrency(rows.garlicm.usProfit), -1928.49);
   assert.equal(rows.garlicm.fee, 100);
 
   assert.equal(roundCurrency(rows.sugar.targetCapital), 20000);
   assert.equal(roundCurrency(rows.sugar.investedCapital), 19813.5);
   assert.equal(roundCurrency(rows.sugar.cashBalance), 186.5);
-  assert.equal(roundCurrency(rows.sugar.usProfit), -4317.32);
+  assert.equal(roundCurrency(rows.sugar.usProfit), -5092.2);
   assert.equal(rows.sugar.fee, 200);
 });
 
@@ -53,8 +53,8 @@ test("us principal is stored as JPY and converted to CNY capital", async () => {
   const rows = byId(calculateSummary(data));
   const totals = calculateAll(data).totals;
 
-  assert.equal(data.assetSnapshots.usStock.principalJpy, 1004250);
-  assert.equal(roundCurrency(totals.usProfit), -8567.55);
+  assert.equal(data.assetSnapshots.usStock.principalJpy, 1039964.2857142857);
+  assert.equal(roundCurrency(totals.usProfit), -10067.55);
   assert.equal(roundCurrency(rows.sugar.capital), 20000);
 });
 
@@ -63,10 +63,9 @@ test("fund current asset only changes Wang fund allocation", async () => {
   const base = byId(calculateSummary(data));
   const changed = byId(calculateSummary({
     ...data,
-    assetSnapshots: {
-      ...data.assetSnapshots,
-      fund: { ...data.assetSnapshots.fund, currentAssetCny: 5100 }
-    }
+    dailyBalances: data.dailyBalances.map((row, index, rows) => index === rows.length - 1
+      ? { ...row, fundCurrentCny: 5100 }
+      : row)
   }));
 
   for (const personId of ["chen", "nanjing", "garlicm", "sugar"]) {
@@ -77,6 +76,30 @@ test("fund current asset only changes Wang fund allocation", async () => {
   assert.equal(roundCurrency(base.wang.fundProfit), -34.54);
   assert.equal(roundCurrency(base.chen.fundProfit), 0);
   assert.equal(roundCurrency(base.nanjing.fundProfit), 0);
+});
+
+test("daily balance blanks carry forward previous balances and FX rate", async () => {
+  const data = await readDefaultData();
+  const changed = calculateAll({
+    ...data,
+    dailyBalances: [
+      ...data.dailyBalances,
+      {
+        id: "blank-carry",
+        date: "2026-06-25",
+        ashareTotalCny: null,
+        usCurrentJpy: null,
+        jpyCnyRate: null,
+        fundCurrentCny: null
+      }
+    ]
+  });
+
+  assert.equal(changed.data.dailyBalancesWithCarry.at(-1).effectiveAshareTotalCny, 22476.04);
+  assert.equal(changed.data.dailyBalancesWithCarry.at(-1).effectiveUsCurrentJpy, 835975);
+  assert.equal(changed.data.dailyBalancesWithCarry.at(-1).effectiveJpyCnyRate, 0.042);
+  assert.equal(changed.data.dailyBalancesWithCarry.at(-1).effectiveFundCurrentCny, 4965.46);
+  assert.equal(roundCurrency(changed.totals.usProfit), -10067.55);
 });
 
 test("post-market deposit starts participating from the next A-share record", () => {
@@ -125,7 +148,7 @@ test("user summary endpoint only returns the logged-in person", async () => {
     const body = await summary.json();
     assert.deepEqual(Object.keys(body), ["person"]);
     assert.equal(body.person.personId, "chen");
-    assert.equal(roundCurrency(body.person.totalProfit), -1166.27);
+    assert.equal(roundCurrency(body.person.totalProfit), -1251.22);
     assert.equal(body.person.cashBalance, 0);
     assert.equal(body.person.fee, 0);
   } finally {
