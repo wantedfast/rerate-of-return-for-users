@@ -29,9 +29,9 @@ function byId(summary) {
 test("default data derives cash balances, fees, and US liquidation adjustment", async () => {
   const rows = byId(calculateSummary(await readDefaultData()));
 
-  assert.equal(roundCurrency(rows.wang.totalProfit), -1433.03);
-  assert.equal(roundCurrency(rows.chen.totalProfit), -1195.58);
-  assert.equal(roundCurrency(rows.nanjing.totalProfit), -1673.81);
+  assert.equal(roundCurrency(rows.wang.totalProfit), -1713);
+  assert.equal(roundCurrency(rows.chen.totalProfit), -1078.93);
+  assert.equal(roundCurrency(rows.nanjing.totalProfit), -1510.5);
   assert.equal(roundCurrency(rows.garlicm.totalProfit), -171.97);
   assert.equal(roundCurrency(rows.sugar.totalProfit), -4092.2);
 
@@ -56,7 +56,7 @@ test("us principal is stored as JPY and converted to CNY capital", async () => {
   assert.equal(roundCurrency(rows.sugar.capital), 20000);
 });
 
-test("fund current asset only changes common pool fund allocation", async () => {
+test("fund current asset only changes Wang fund allocation", async () => {
   const data = await readDefaultData();
   const base = byId(calculateSummary(data));
   const changed = byId(calculateSummary({
@@ -67,11 +67,14 @@ test("fund current asset only changes common pool fund allocation", async () => 
     }
   }));
 
-  for (const personId of ["garlicm", "sugar"]) {
+  for (const personId of ["chen", "nanjing", "garlicm", "sugar"]) {
     assert.equal(roundCurrency(base[personId].fundProfit), roundCurrency(changed[personId].fundProfit));
   }
 
   assert.notEqual(roundCurrency(base.wang.fundProfit), roundCurrency(changed.wang.fundProfit));
+  assert.equal(roundCurrency(base.wang.fundProfit), -34.54);
+  assert.equal(roundCurrency(base.chen.fundProfit), 0);
+  assert.equal(roundCurrency(base.nanjing.fundProfit), 0);
 });
 
 test("post-market deposit starts participating from the next A-share record", () => {
@@ -120,7 +123,7 @@ test("user summary endpoint only returns the logged-in person", async () => {
     const body = await summary.json();
     assert.deepEqual(Object.keys(body), ["person"]);
     assert.equal(body.person.personId, "chen");
-    assert.equal(roundCurrency(body.person.totalProfit), -1195.58);
+    assert.equal(roundCurrency(body.person.totalProfit), -1078.93);
     assert.equal(body.person.cashBalance, 0);
     assert.equal(body.person.fee, 0);
   } finally {
