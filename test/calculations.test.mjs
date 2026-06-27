@@ -29,20 +29,22 @@ function byId(summary) {
 test("default data derives cash balances, fees, and US liquidation adjustment", async () => {
   const rows = byId(calculateSummary(await readDefaultData()));
 
-  assert.equal(roundCurrency(rows.wang.totalProfit), -1713);
-  assert.equal(roundCurrency(rows.chen.totalProfit), -1078.93);
-  assert.equal(roundCurrency(rows.nanjing.totalProfit), -1510.5);
-  assert.equal(roundCurrency(rows.garlicm.totalProfit), -171.97);
-  assert.equal(roundCurrency(rows.sugar.totalProfit), -4092.2);
+  assert.equal(roundCurrency(rows.wang.totalProfit), -1959.94);
+  assert.equal(roundCurrency(rows.chen.totalProfit), -1166.27);
+  assert.equal(roundCurrency(rows.nanjing.totalProfit), -1632.78);
+  assert.equal(roundCurrency(rows.garlicm.totalProfit), -659.71);
+  assert.equal(roundCurrency(rows.sugar.totalProfit), -4586.39);
 
   assert.equal(roundCurrency(rows.garlicm.targetCapital), 20000);
-  assert.equal(roundCurrency(rows.garlicm.cashBalance), 1606.79);
+  assert.equal(roundCurrency(rows.garlicm.investedCapital), 19831.71);
+  assert.equal(roundCurrency(rows.garlicm.cashBalance), 168.29);
+  assert.equal(roundCurrency(rows.garlicm.usProfit), -1647.43);
   assert.equal(rows.garlicm.fee, 100);
 
   assert.equal(roundCurrency(rows.sugar.targetCapital), 20000);
   assert.equal(roundCurrency(rows.sugar.investedCapital), 19813.5);
   assert.equal(roundCurrency(rows.sugar.cashBalance), 186.5);
-  assert.equal(roundCurrency(rows.sugar.usProfit), -3823.12);
+  assert.equal(roundCurrency(rows.sugar.usProfit), -4317.32);
   assert.equal(rows.sugar.fee, 200);
 });
 
@@ -51,8 +53,8 @@ test("us principal is stored as JPY and converted to CNY capital", async () => {
   const rows = byId(calculateSummary(data));
   const totals = calculateAll(data).totals;
 
-  assert.equal(data.assetSnapshots.usStock.principalJpy, 970000);
-  assert.equal(roundCurrency(totals.usProfit), -7129.05);
+  assert.equal(data.assetSnapshots.usStock.principalJpy, 1004250);
+  assert.equal(roundCurrency(totals.usProfit), -8567.55);
   assert.equal(roundCurrency(rows.sugar.capital), 20000);
 });
 
@@ -123,7 +125,7 @@ test("user summary endpoint only returns the logged-in person", async () => {
     const body = await summary.json();
     assert.deepEqual(Object.keys(body), ["person"]);
     assert.equal(body.person.personId, "chen");
-    assert.equal(roundCurrency(body.person.totalProfit), -1078.93);
+    assert.equal(roundCurrency(body.person.totalProfit), -1166.27);
     assert.equal(body.person.cashBalance, 0);
     assert.equal(body.person.fee, 0);
   } finally {

@@ -21,7 +21,7 @@
   },
   "assetSnapshots": {
     "usStock": {
-      "principalJpy": 970000,
+      "principalJpy": 1004250,
       "currentAssetJpy": 835975,
       "jpyCnyRate": 0.042
     },
@@ -67,7 +67,7 @@
     { "id": "flow-15", "date": "2026-06-24", "assetType": "us", "type": "deposit", "amount": 200035.42737295356, "timing": "pre", "holderType": "person", "holderId": "wang" },
     { "id": "flow-16", "date": "2026-06-24", "assetType": "us", "type": "deposit", "amount": 70752.04857150512, "timing": "pre", "holderType": "person", "holderId": "chen" },
     { "id": "flow-17", "date": "2026-06-24", "assetType": "us", "type": "deposit", "amount": 99052.86800010716, "timing": "pre", "holderType": "person", "holderId": "nanjing" },
-    { "id": "flow-18", "date": "2026-06-24", "assetType": "us", "type": "deposit", "amount": 199838.22429519845, "timing": "pre", "holderType": "person", "holderId": "garlicm" },
+    { "id": "flow-18", "date": "2026-06-24", "assetType": "us", "type": "deposit", "amount": 234088.22429519845, "timing": "pre", "holderType": "person", "holderId": "garlicm" },
     { "id": "flow-19", "date": "2026-06-24", "assetType": "us", "type": "deposit", "amount": 400321.43176023575, "timing": "pre", "holderType": "person", "holderId": "sugar" }
   ]
 }
