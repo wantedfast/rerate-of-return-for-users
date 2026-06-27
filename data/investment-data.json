@@ -1,0 +1,157 @@
+{
+  "people": [
+    { "id": "wang", "name": "王欣隆", "password": "wang123" },
+    { "id": "chen", "name": "Chen", "password": "chen123" },
+    { "id": "nanjing", "name": "南京哥", "password": "nanjing123" },
+    { "id": "garlicm", "name": "Garlicm", "password": "garlicm123" },
+    { "id": "sugar", "name": "糖", "password": "sugar123" }
+  ],
+  "admin": { "username": "admin", "password": "admin123" },
+  "totalCapitalTargets": {
+    "wang": 20836.37,
+    "chen": 5000,
+    "nanjing": 7000,
+    "garlicm": 20036.76,
+    "sugar": 20056
+  },
+  "assetSnapshots": {
+    "ashare": {
+      "commonPoolPersonIds": ["wang", "chen", "nanjing"],
+      "openingCapitalCny": {
+        "wang": 14136.37,
+        "chen": 5000,
+        "nanjing": 7000,
+        "garlicm": 0,
+        "sugar": 1500
+      },
+      "commonPoolToUsStockDate": "2026-06-15",
+      "commonPoolToUsStockCny": 15757.33,
+      "currentTotalAssetsCny": 22476.04,
+      "specialPrincipalCny": {
+        "garlicm": 10000,
+        "sugar": 1400
+      }
+    },
+    "usStock": {
+      "principalJpy": 850000,
+      "currentAssetJpy": 822997,
+      "earlyRealizedPnlJpy": -30488,
+      "laterRealizedPnlJpy": -9862,
+      "floatingPnlJpy": -88360,
+      "jpyCnyRate": 0.042,
+      "currentCapitalByPersonCny": {
+        "wang": 8522.661987571342,
+        "chen": 3014.4450051786075,
+        "nanjing": 4220.22300725005,
+        "garlicm": 10036.76,
+        "sugar": 18556
+      }
+    },
+    "fund": {
+      "ownerId": "wang",
+      "principalCny": 5000,
+      "currentAssetCny": 4965.46
+    }
+  },
+  "dailyBalances": [
+    { "id": "d-2026-06-01", "date": "2026-06-01", "ashareProfitCny": -1035 },
+    { "id": "d-2026-06-02", "date": "2026-06-02", "ashareProfitCny": 267 },
+    { "id": "d-2026-06-03", "date": "2026-06-03", "ashareProfitCny": -1272 },
+    { "id": "d-2026-06-04", "date": "2026-06-04", "ashareProfitCny": 1134 },
+    { "id": "d-2026-06-05", "date": "2026-06-05", "ashareProfitCny": -1202 },
+    { "id": "d-2026-06-08", "date": "2026-06-08", "ashareProfitCny": -674 },
+    { "id": "d-2026-06-09", "date": "2026-06-09", "ashareProfitCny": 563 },
+    { "id": "d-2026-06-10", "date": "2026-06-10", "ashareProfitCny": -127 },
+    { "id": "d-2026-06-11", "date": "2026-06-11", "ashareProfitCny": -2875 },
+    { "id": "d-2026-06-12", "date": "2026-06-12", "ashareProfitCny": -1529 },
+    { "id": "d-2026-06-15", "date": "2026-06-15", "ashareProfitCny": 1811 },
+    { "id": "d-2026-06-16", "date": "2026-06-16", "ashareProfitCny": 1669 },
+    { "id": "d-2026-06-17", "date": "2026-06-17", "ashareProfitCny": 118 },
+    { "id": "d-2026-06-18", "date": "2026-06-18", "ashareProfitCny": -270 },
+    { "id": "d-2026-06-22", "date": "2026-06-22", "ashareProfitCny": 1432 },
+    { "id": "d-2026-06-23", "date": "2026-06-23", "ashareProfitCny": -301 },
+    { "id": "d-2026-06-24", "date": "2026-06-24", "ashareProfitCny": 1188 }
+  ],
+  "dailySnapshots": [
+    {
+      "date": "2026-06-23",
+      "aShare": {
+        "beginningAssetsCny": 37536.37,
+        "depositCny": 0,
+        "withdrawalCny": 0,
+        "endingAssetsCny": 37536.37
+      },
+      "usStock": {
+        "beginningAssetsCny": 44350.09,
+        "depositCny": 0,
+        "withdrawalCny": 0,
+        "endingAssetsCny": 44150.09
+      },
+      "fund": {
+        "beginningAssetsCny": 5000,
+        "depositCny": 0,
+        "withdrawalCny": 0,
+        "endingAssetsCny": 4965.46
+      }
+    },
+    {
+      "date": "2026-06-24",
+      "aShare": {
+        "externalDepositCny": 0,
+        "externalWithdrawalCny": 0,
+        "transferInCny": 0,
+        "transferOutCny": 15757.33,
+        "endingAssetsCny": 22476.04
+      },
+      "usStock": {
+        "depositCny": 0,
+        "withdrawalCny": 500,
+        "endingAssetsCny": 43700.09
+      },
+      "fund": {
+        "depositCny": 0,
+        "withdrawalCny": 0,
+        "endingAssetsCny": 4985.46
+      }
+    }
+  ],
+  "flows": [
+    { "id": "f-2026-06-15-wang-plus", "date": "2026-06-15", "asset": "ashare", "personId": "wang", "amountCny": 6000, "timing": "pre" },
+    { "id": "f-2026-06-16-wang-minus", "date": "2026-06-16", "asset": "ashare", "personId": "wang", "amountCny": -6000, "timing": "pre" },
+    { "id": "f-2026-06-16-wang-plus", "date": "2026-06-16", "asset": "ashare", "personId": "wang", "amountCny": 10000, "timing": "pre" },
+    { "id": "f-2026-06-16-common-us", "date": "2026-06-16", "asset": "ashare", "personId": "common", "amountCny": -7878.665, "timing": "pre" },
+    { "id": "f-2026-06-17-wang-minus", "date": "2026-06-17", "asset": "ashare", "personId": "wang", "amountCny": -3300, "timing": "pre" },
+    { "id": "f-2026-06-17-common-us", "date": "2026-06-17", "asset": "ashare", "personId": "common", "amountCny": -7878.665, "timing": "pre" },
+    { "id": "f-2026-06-17-garlicm-plus", "date": "2026-06-17", "asset": "ashare", "personId": "garlicm", "amountCny": 9000, "timing": "pre" },
+    { "id": "f-2026-06-22-wang-fund", "date": "2026-06-22", "asset": "ashare", "personId": "wang", "amountCny": -5000, "timing": "pre" },
+    { "id": "f-2026-06-22-garlicm-plus", "date": "2026-06-22", "asset": "ashare", "personId": "garlicm", "amountCny": 1000, "timing": "pre" }
+  ],
+  "cashBalances": {
+    "wang": 0,
+    "chen": 0,
+    "nanjing": 0,
+    "garlicm": 0,
+    "sugar": 0
+  },
+  "fees": {
+    "wang": 0,
+    "chen": 0,
+    "nanjing": 0,
+    "garlicm": 0,
+    "sugar": 0
+  },
+  "memberNotes": {
+    "wang": "共同池 + 借款A股 + 美股/基金分摊",
+    "chen": "共同池分摊",
+    "nanjing": "共同池分摊",
+    "garlicm": "专项A股 + 专项美股",
+    "sugar": "专项A股 + 专项美股"
+  },
+  "fixedAllocationLabels": {
+    "wang": "Wang",
+    "chen": "Chen",
+    "nanjing": "Nanjing",
+    "garlicm": "Garlicm",
+    "sugar": "Sugar/Tang"
+  }
+}
