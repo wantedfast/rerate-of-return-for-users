@@ -1,0 +1,53 @@
+{
+  "assetSnapshots": {
+    "usStock": {
+      "principalJpy": 970000,
+      "currentAssetJpy": 835975,
+      "jpyCnyRate": 0.042
+    },
+    "fund": {
+      "principalCny": 5000,
+      "currentAssetCny": 4965.46
+    },
+    "aShareDaily": [
+      { "id": "d-2026-06-01", "date": "2026-06-01", "totalCny": 26601.37 },
+      { "id": "d-2026-06-02", "date": "2026-06-02", "totalCny": 26868.37 },
+      { "id": "d-2026-06-03", "date": "2026-06-03", "totalCny": 25596.37 },
+      { "id": "d-2026-06-04", "date": "2026-06-04", "totalCny": 26730.37 },
+      { "id": "d-2026-06-05", "date": "2026-06-05", "totalCny": 25528.37 },
+      { "id": "d-2026-06-08", "date": "2026-06-08", "totalCny": 24854.37 },
+      { "id": "d-2026-06-09", "date": "2026-06-09", "totalCny": 25417.37 },
+      { "id": "d-2026-06-10", "date": "2026-06-10", "totalCny": 25290.37 },
+      { "id": "d-2026-06-11", "date": "2026-06-11", "totalCny": 22415.37 },
+      { "id": "d-2026-06-12", "date": "2026-06-12", "totalCny": 20886.37 },
+      { "id": "d-2026-06-15", "date": "2026-06-15", "totalCny": 28697.37 },
+      { "id": "d-2026-06-16", "date": "2026-06-16", "totalCny": 26487.705 },
+      { "id": "d-2026-06-17", "date": "2026-06-17", "totalCny": 24427.04 },
+      { "id": "d-2026-06-18", "date": "2026-06-18", "totalCny": 24157.04 },
+      { "id": "d-2026-06-22", "date": "2026-06-22", "totalCny": 21589.04 },
+      { "id": "d-2026-06-23", "date": "2026-06-23", "totalCny": 21288.04 },
+      { "id": "d-2026-06-24", "date": "2026-06-24", "totalCny": 22476.04 }
+    ]
+  },
+  "flows": [
+    { "id": "flow-1", "date": "2026-06-01", "assetType": "ashare", "type": "deposit", "amount": 14136.37, "timing": "pre", "holderType": "person", "holderId": "wang" },
+    { "id": "flow-2", "date": "2026-06-01", "assetType": "ashare", "type": "deposit", "amount": 5000, "timing": "pre", "holderType": "person", "holderId": "chen" },
+    { "id": "flow-3", "date": "2026-06-01", "assetType": "ashare", "type": "deposit", "amount": 7000, "timing": "pre", "holderType": "person", "holderId": "nanjing" },
+    { "id": "flow-4", "date": "2026-06-01", "assetType": "ashare", "type": "deposit", "amount": 1500, "timing": "pre", "holderType": "person", "holderId": "sugar" },
+    { "id": "flow-5", "date": "2026-06-15", "assetType": "ashare", "type": "deposit", "amount": 6000, "timing": "pre", "holderType": "person", "holderId": "wang" },
+    { "id": "flow-6", "date": "2026-06-16", "assetType": "ashare", "type": "withdrawal", "amount": 6000, "timing": "pre", "holderType": "person", "holderId": "wang" },
+    { "id": "flow-7", "date": "2026-06-16", "assetType": "ashare", "type": "deposit", "amount": 10000, "timing": "pre", "holderType": "person", "holderId": "wang" },
+    { "id": "flow-8", "date": "2026-06-16", "assetType": "ashare", "type": "withdrawal", "amount": 7878.665, "timing": "pre", "holderType": "pool", "holderId": "common" },
+    { "id": "flow-9", "date": "2026-06-17", "assetType": "ashare", "type": "withdrawal", "amount": 3300, "timing": "pre", "holderType": "person", "holderId": "wang" },
+    { "id": "flow-10", "date": "2026-06-17", "assetType": "ashare", "type": "deposit", "amount": 9000, "timing": "pre", "holderType": "person", "holderId": "garlicm" },
+    { "id": "flow-11", "date": "2026-06-17", "assetType": "ashare", "type": "withdrawal", "amount": 7878.665, "timing": "pre", "holderType": "pool", "holderId": "common" },
+    { "id": "flow-12", "date": "2026-06-22", "assetType": "ashare", "type": "withdrawal", "amount": 5000, "timing": "pre", "holderType": "pool", "holderId": "common" },
+    { "id": "flow-13", "date": "2026-06-22", "assetType": "fund", "type": "deposit", "amount": 5000, "timing": "pre", "holderType": "pool", "holderId": "common" },
+    { "id": "flow-14", "date": "2026-06-22", "assetType": "ashare", "type": "deposit", "amount": 1000, "timing": "pre", "holderType": "person", "holderId": "garlicm" },
+    { "id": "flow-15", "date": "2026-06-24", "assetType": "us", "type": "deposit", "amount": 200035.42737295356, "timing": "pre", "holderType": "person", "holderId": "wang" },
+    { "id": "flow-16", "date": "2026-06-24", "assetType": "us", "type": "deposit", "amount": 70752.04857150512, "timing": "pre", "holderType": "person", "holderId": "chen" },
+    { "id": "flow-17", "date": "2026-06-24", "assetType": "us", "type": "deposit", "amount": 99052.86800010716, "timing": "pre", "holderType": "person", "holderId": "nanjing" },
+    { "id": "flow-18", "date": "2026-06-24", "assetType": "us", "type": "deposit", "amount": 199838.22429519845, "timing": "pre", "holderType": "person", "holderId": "garlicm" },
+    { "id": "flow-19", "date": "2026-06-24", "assetType": "us", "type": "deposit", "amount": 400321.43176023575, "timing": "pre", "holderType": "person", "holderId": "sugar" }
+  ]
+}

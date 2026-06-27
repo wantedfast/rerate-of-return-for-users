@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.vite/
+
+*.log
+server.out.log
+server.err.log
+
+data/backups/*
+!data/backups/.gitkeep
+
+.env
+.DS_Store
+Thumbs.db

@@ -1,0 +1,45 @@
+{
+  "users": [
+    {
+      "username": "admin",
+      "password": "admin123",
+      "role": "admin",
+      "displayName": "Admin"
+    },
+    {
+      "username": "wang",
+      "password": "wang123",
+      "role": "user",
+      "personId": "wang",
+      "displayName": "王欣隆"
+    },
+    {
+      "username": "chen",
+      "password": "chen123",
+      "role": "user",
+      "personId": "chen",
+      "displayName": "chen"
+    },
+    {
+      "username": "nanjing",
+      "password": "nanjing123",
+      "role": "user",
+      "personId": "nanjing",
+      "displayName": "南京哥"
+    },
+    {
+      "username": "garlicm",
+      "password": "garlicm123",
+      "role": "user",
+      "personId": "garlicm",
+      "displayName": "garlicm"
+    },
+    {
+      "username": "sugar",
+      "password": "sugar123",
+      "role": "user",
+      "personId": "sugar",
+      "displayName": "糖"
+    }
+  ]
+}
