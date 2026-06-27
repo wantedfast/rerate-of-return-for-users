@@ -95,6 +95,8 @@ export function createApp(options = {}) {
       person: {
         personId: person.personId,
         personName: person.personName,
+        cashBalance: person.cashBalance,
+        fee: person.fee,
         totalProfit: person.totalProfit,
         capital: person.capital,
         returnRate: person.returnRate
@@ -150,4 +152,3 @@ export function createApp(options = {}) {
 
   return app;
 }
-

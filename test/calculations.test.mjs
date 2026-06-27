@@ -22,7 +22,7 @@ async function listen(app) {
   return server;
 }
 
-test("confirmed default data matches accepted totals", async () => {
+test("default data includes cash balances and fee deductions", async () => {
   const summary = calculateSummary(await readDefaultData());
   const totals = Object.fromEntries(summary.map((row) => [row.personName, roundCurrency(row.totalProfit)]));
 
@@ -30,9 +30,16 @@ test("confirmed default data matches accepted totals", async () => {
     王欣隆: -1433.03,
     chen: -1195.58,
     南京哥: -1673.81,
-    garlicm: -71.97,
-    糖: -2392.2
+    garlicm: -171.97,
+    糖: -2592.2
   });
+
+  const garlicm = summary.find((row) => row.personId === "garlicm");
+  const sugar = summary.find((row) => row.personId === "sugar");
+  assert.equal(garlicm.cashBalance, 20000);
+  assert.equal(garlicm.fee, 100);
+  assert.equal(sugar.cashBalance, 20000);
+  assert.equal(sugar.fee, 200);
 });
 
 test("us principal is stored as JPY and converted to CNY capital", async () => {
@@ -42,7 +49,7 @@ test("us principal is stored as JPY and converted to CNY capital", async () => {
 
   assert.equal(data.assetSnapshots.usStock.principalJpy, 970000);
   assert.equal(roundCurrency(totals.usProfit), -5629.05);
-  assert.equal(roundCurrency(summary.find((row) => row.personId === "sugar").capital), 18313.5);
+  assert.equal(roundCurrency(summary.find((row) => row.personId === "sugar").capital), 38313.5);
 });
 
 test("fund current asset only changes common pool fund allocation", async () => {
@@ -115,6 +122,8 @@ test("user summary endpoint only returns the logged-in person", async () => {
     assert.deepEqual(Object.keys(body), ["person"]);
     assert.equal(body.person.personId, "chen");
     assert.equal(roundCurrency(body.person.totalProfit), -1195.58);
+    assert.equal(body.person.cashBalance, 0);
+    assert.equal(body.person.fee, 0);
   } finally {
     server.closeAllConnections?.();
     await new Promise((resolve) => server.close(resolve));

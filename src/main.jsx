@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   ASSET_LABEL,
@@ -132,6 +132,8 @@ function UserPage({ user, onLogout }) {
       {summary && (
         <section className="summary-grid user-grid">
           <Metric label="总盈亏 CNY" value={formatCurrency(summary.totalProfit)} tone={summary.totalProfit} />
+          <Metric label="现金余额 CNY" value={formatCurrency(summary.cashBalance)} />
+          <Metric label="手续费 CNY" value={formatCurrency(summary.fee)} tone={-summary.fee} />
           <Metric label="投入本金 CNY" value={formatCurrency(summary.capital)} />
           <Metric label="收益率" value={formatRate(summary.returnRate)} tone={summary.returnRate} />
         </section>
@@ -213,9 +215,12 @@ function AdminPage({ user, onLogout }) {
             <Metric label="A股盈亏" value={formatCurrency(totals.aShareProfit)} tone={totals.aShareProfit} />
             <Metric label="美股盈亏" value={formatCurrency(totals.usProfit)} tone={totals.usProfit} />
             <Metric label="基金盈亏" value={formatCurrency(totals.fundProfit)} tone={totals.fundProfit} />
+            <Metric label="现金余额" value={formatCurrency(totals.cashBalance)} />
+            <Metric label="手续费" value={formatCurrency(totals.fee)} tone={-totals.fee} />
           </section>
 
           <AssetEditor data={payload.data} setData={setData} />
+          <CashFeeEditor data={payload.data} setData={setData} people={payload.meta.people} />
           <SummaryTable rows={payload.results.summary} />
           <SplitDetails results={payload.results} />
           <FlowEditor data={payload.data} setData={setData} />
@@ -264,7 +269,7 @@ function AssetEditor({ data, setData }) {
 
   return (
     <section className="panel">
-      <h2>每日资产金额</h2>
+      <h2>每日账户金额</h2>
       <div className="input-grid">
         <label>美股本金 JPY
           <input type="number" value={data.assetSnapshots.usStock.principalJpy} onChange={(event) => update(["usStock", "principalJpy"], event.target.value)} />
@@ -286,6 +291,43 @@ function AssetEditor({ data, setData }) {
   );
 }
 
+function CashFeeEditor({ data, setData, people }) {
+  function update(bucket, personId, value) {
+    setData((current) => {
+      const next = structuredClone(current);
+      next[bucket] = next[bucket] ?? {};
+      next[bucket][personId] = Number(value);
+      return next;
+    });
+  }
+
+  return (
+    <section className="panel">
+      <h2>现金余额 / 手续费</h2>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>人</th>
+              <th>现金余额 CNY</th>
+              <th>手续费 CNY</th>
+            </tr>
+          </thead>
+          <tbody>
+            {people.map((person) => (
+              <tr key={person.id}>
+                <td>{person.name}</td>
+                <td><input type="number" value={data.cashBalances?.[person.id] ?? 0} onChange={(event) => update("cashBalances", person.id, event.target.value)} /></td>
+                <td><input type="number" value={data.fees?.[person.id] ?? 0} onChange={(event) => update("fees", person.id, event.target.value)} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
 function SummaryTable({ rows }) {
   return (
     <section className="panel">
@@ -298,6 +340,8 @@ function SummaryTable({ rows }) {
               <th>A股</th>
               <th>基金</th>
               <th>美股</th>
+              <th>现金余额</th>
+              <th>手续费</th>
               <th>总盈亏</th>
               <th>投入本金</th>
               <th>收益率</th>
@@ -310,6 +354,8 @@ function SummaryTable({ rows }) {
                 <MoneyCell value={row.aShareProfit} />
                 <MoneyCell value={row.fundProfit} />
                 <MoneyCell value={row.usProfit} />
+                <td>{formatCurrency(row.cashBalance)}</td>
+                <MoneyCell value={-row.fee} />
                 <MoneyCell value={row.totalProfit} strong />
                 <td>{formatCurrency(row.capital)}</td>
                 <td className={row.returnRate >= 0 ? "pos strong" : "neg strong"}>{formatRate(row.returnRate)}</td>
@@ -368,7 +414,7 @@ function FlowEditor({ data, setData }) {
   return (
     <section className="panel">
       <div className="section-header">
-        <h2>入金 / 出金流水</h2>
+        <h2>资金变动：入金 / 出金</h2>
         <button onClick={addFlow}>新增流水</button>
       </div>
       <div className="table-wrap">

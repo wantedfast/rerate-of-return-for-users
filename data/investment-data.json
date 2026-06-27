@@ -1,4 +1,18 @@
 {
+  "cashBalances": {
+    "wang": 0,
+    "chen": 0,
+    "nanjing": 0,
+    "garlicm": 20000,
+    "sugar": 20000
+  },
+  "fees": {
+    "wang": 0,
+    "chen": 0,
+    "nanjing": 0,
+    "garlicm": 100,
+    "sugar": 200
+  },
   "assetSnapshots": {
     "usStock": {
       "principalJpy": 970000,

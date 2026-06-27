@@ -29,41 +29,15 @@ export function roundCurrency(value) {
   return Math.round((numberOrZero(value) + Number.EPSILON) * 100) / 100;
 }
 
-function normalizeAssetType(value) {
-  const map = {
-    A股: "ashare",
-    美股: "us",
-    基金: "fund",
-    "A鑲?": "ashare",
-    "缇庤偂": "us",
-    "鍩洪噾": "fund"
-  };
-  return map[value] ?? value ?? "ashare";
-}
-
-function normalizeFlowType(value) {
-  const map = {
-    入金: "deposit",
-    出金: "withdrawal",
-    "鍏ラ噾": "deposit",
-    "鍑洪噾": "withdrawal"
-  };
-  return map[value] ?? value ?? "deposit";
-}
-
-function normalizeTiming(value) {
-  const map = {
-    盘前: "pre",
-    盘后: "post",
-    "鐩樺墠": "pre",
-    "鐩樺悗": "post"
-  };
-  return map[value] ?? value ?? "pre";
+function normalizeByPerson(source = {}) {
+  return Object.fromEntries(PERSON_IDS.map((personId) => [personId, numberOrZero(source[personId])]));
 }
 
 export function normalizeInvestmentData(input = {}) {
   const assetSnapshots = input.assetSnapshots ?? {};
   return {
+    cashBalances: normalizeByPerson(input.cashBalances),
+    fees: normalizeByPerson(input.fees),
     assetSnapshots: {
       usStock: {
         principalJpy: numberOrZero(assetSnapshots.usStock?.principalJpy),
@@ -91,10 +65,10 @@ export function normalizeInvestmentData(input = {}) {
         return {
           id: flow.id ?? `flow-${index + 1}`,
           date: String(flow.date ?? ""),
-          assetType: normalizeAssetType(flow.assetType),
-          type: normalizeFlowType(flow.type),
+          assetType: String(flow.assetType ?? "ashare"),
+          type: String(flow.type ?? "deposit"),
           amount: numberOrZero(flow.amount),
-          timing: normalizeTiming(flow.timing),
+          timing: String(flow.timing ?? "pre"),
           holderType,
           holderId: holderType === "pool" ? COMMON_POOL_ID : holderValue
         };
@@ -118,8 +92,12 @@ export function resolveEffectiveDate(flow, recordDates) {
   return targetIndex === -1 ? null : recordDates[targetIndex];
 }
 
+function signedFlowAmount(flow) {
+  return flow.type === "withdrawal" ? -numberOrZero(flow.amount) : numberOrZero(flow.amount);
+}
+
 function buildFlowBreakdown(flow) {
-  const signedAmount = flow.type === "withdrawal" ? -numberOrZero(flow.amount) : numberOrZero(flow.amount);
+  const signedAmount = signedFlowAmount(flow);
   if (flow.holderType === "pool") {
     return PERSON_IDS.map((personId) => ({
       personId,
@@ -129,7 +107,8 @@ function buildFlowBreakdown(flow) {
   return [{ personId: flow.holderId, amount: signedAmount }];
 }
 
-export function getEffectiveFlows(data) {
+export function getEffectiveFlows(input) {
+  const data = normalizeInvestmentData(input);
   const recordDates = getRecordDates(data);
   return data.flows
     .map((flow) => ({
@@ -139,10 +118,6 @@ export function getEffectiveFlows(data) {
       personBreakdown: buildFlowBreakdown(flow)
     }))
     .filter((flow) => flow.effectiveDate);
-}
-
-function signedFlowAmount(flow) {
-  return flow.type === "withdrawal" ? -numberOrZero(flow.amount) : numberOrZero(flow.amount);
 }
 
 function allocatePoolDeposit(balances, signedAmount) {
@@ -172,9 +147,8 @@ function applyAshareFlow(balances, flow) {
 
 export function calculateAshareTimeline(input) {
   const data = normalizeInvestmentData(input);
-  const effectiveFlows = data.flows.filter((flow) => flow.assetType === "ashare");
   const groupedFlows = new Map();
-  for (const flow of effectiveFlows) {
+  for (const flow of data.flows.filter((item) => item.assetType === "ashare")) {
     const list = groupedFlows.get(flow.date) ?? [];
     list.push(flow);
     groupedFlows.set(flow.date, list);
@@ -187,12 +161,8 @@ export function calculateAshareTimeline(input) {
 
   for (const row of data.assetSnapshots.aShareDaily) {
     const flows = groupedFlows.get(row.date) ?? [];
-    const deposits = flows
-      .filter((flow) => flow.type === "deposit")
-      .reduce((sum, flow) => sum + numberOrZero(flow.amount), 0);
-    const withdrawals = flows
-      .filter((flow) => flow.type === "withdrawal")
-      .reduce((sum, flow) => sum + numberOrZero(flow.amount), 0);
+    const deposits = flows.filter((flow) => flow.type === "deposit").reduce((sum, flow) => sum + numberOrZero(flow.amount), 0);
+    const withdrawals = flows.filter((flow) => flow.type === "withdrawal").reduce((sum, flow) => sum + numberOrZero(flow.amount), 0);
     const dailyProfit = row.totalCny === null
       ? numberOrZero(row.profit)
       : numberOrZero(row.totalCny) - previousTotal - deposits + withdrawals;
@@ -267,8 +237,7 @@ function allocateProfit(totalProfit, capitalByPerson) {
 export function calculateFund(input) {
   const data = normalizeInvestmentData(input);
   const capitalByPerson = calculateAssetCapital(data, "fund");
-  const totalProfit = numberOrZero(data.assetSnapshots.fund.currentAssetCny)
-    - numberOrZero(data.assetSnapshots.fund.principalCny);
+  const totalProfit = numberOrZero(data.assetSnapshots.fund.currentAssetCny) - numberOrZero(data.assetSnapshots.fund.principalCny);
   return {
     byPerson: allocateProfit(totalProfit, capitalByPerson),
     capitalByPerson,
@@ -280,8 +249,7 @@ export function calculateUsStocks(input) {
   const data = normalizeInvestmentData(input);
   const capitalByPerson = calculateAssetCapital(data, "us");
   const totalProfit = (
-    numberOrZero(data.assetSnapshots.usStock.currentAssetJpy)
-    - numberOrZero(data.assetSnapshots.usStock.principalJpy)
+    numberOrZero(data.assetSnapshots.usStock.currentAssetJpy) - numberOrZero(data.assetSnapshots.usStock.principalJpy)
   ) * numberOrZero(data.assetSnapshots.usStock.jpyCnyRate);
   return {
     byPerson: allocateProfit(totalProfit, capitalByPerson),
@@ -305,14 +273,20 @@ export function calculateSummary(input) {
     const aShareProfit = ashare.byPerson[personId] ?? 0;
     const fundProfit = fund.byPerson[personId] ?? 0;
     const usProfit = us.byPerson[personId] ?? 0;
-    const totalProfit = aShareProfit + fundProfit + usProfit;
-    const capital = capitalByAsset.ashare[personId] + capitalByAsset.fund[personId] + capitalByAsset.us[personId];
+    const cashBalance = data.cashBalances[personId] ?? 0;
+    const fee = data.fees[personId] ?? 0;
+    const investmentProfit = aShareProfit + fundProfit + usProfit;
+    const totalProfit = investmentProfit - fee;
+    const capital = capitalByAsset.ashare[personId] + capitalByAsset.fund[personId] + capitalByAsset.us[personId] + cashBalance;
     return {
       personId,
       personName: PERSON_NAME_BY_ID[personId] ?? personId,
       aShareProfit,
       fundProfit,
       usProfit,
+      cashBalance,
+      fee,
+      investmentProfit,
       totalProfit,
       capital,
       returnRate: capital === 0 ? null : totalProfit / capital
@@ -340,11 +314,13 @@ export function calculateAll(input) {
       acc.aShareProfit += row.aShareProfit;
       acc.fundProfit += row.fundProfit;
       acc.usProfit += row.usProfit;
+      acc.cashBalance += row.cashBalance;
+      acc.fee += row.fee;
       acc.totalProfit += row.totalProfit;
       acc.capital += row.capital;
       return acc;
     },
-    { aShareProfit: 0, fundProfit: 0, usProfit: 0, totalProfit: 0, capital: 0 }
+    { aShareProfit: 0, fundProfit: 0, usProfit: 0, cashBalance: 0, fee: 0, totalProfit: 0, capital: 0 }
   );
 
   return {
