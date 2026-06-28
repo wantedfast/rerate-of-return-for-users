@@ -258,6 +258,8 @@ function Metric({ label, value, tone }) {
 
 function AssetEditor({ data, setData }) {
   const dailyBalances = data.dailyBalances ?? [];
+  const usStock = data.assetSnapshots?.usStock ?? {};
+  const fund = data.assetSnapshots?.fund ?? {};
 
   function updateSnapshot(path, value) {
     setData((current) => {
@@ -265,7 +267,7 @@ function AssetEditor({ data, setData }) {
       const [section, key] = path;
       next.assetSnapshots = next.assetSnapshots ?? {};
       next.assetSnapshots[section] = next.assetSnapshots[section] ?? {};
-      next.assetSnapshots[section][key] = Number(value);
+      next.assetSnapshots[section][key] = key === "earlyRealizedOwnerId" ? value : parseOptionalNumber(value);
       return next;
     });
   }
@@ -290,6 +292,7 @@ function AssetEditor({ data, setData }) {
       next.dailyBalances.push({
         id: `daily-${Date.now()}`,
         date: next.dailyBalances.at(-1)?.date ?? "",
+        ashareProfitCny: null,
         ashareTotalCny: null,
         usCurrentJpy: null,
         jpyCnyRate: null,
@@ -311,6 +314,29 @@ function AssetEditor({ data, setData }) {
     <section className="panel">
       <h2>本金设置</h2>
       <div className="input-grid">
+        <label>US current asset JPY
+          <input type="number" value={usStock.currentAssetJpy ?? ""} onChange={(event) => updateSnapshot(["usStock", "currentAssetJpy"], event.target.value)} />
+        </label>
+        <label>JPY/CNY rate
+          <input type="number" step="0.0001" value={usStock.jpyCnyRate ?? ""} onChange={(event) => updateSnapshot(["usStock", "jpyCnyRate"], event.target.value)} />
+        </label>
+        <label>US early realized P/L JPY
+          <input type="number" value={usStock.earlyRealizedPnlJpy ?? ""} onChange={(event) => updateSnapshot(["usStock", "earlyRealizedPnlJpy"], event.target.value)} />
+        </label>
+        <label>US later realized P/L JPY
+          <input type="number" value={usStock.laterRealizedPnlJpy ?? ""} onChange={(event) => updateSnapshot(["usStock", "laterRealizedPnlJpy"], event.target.value)} />
+        </label>
+        <label>US floating P/L JPY
+          <input type="number" value={usStock.floatingPnlJpy ?? ""} onChange={(event) => updateSnapshot(["usStock", "floatingPnlJpy"], event.target.value)} />
+        </label>
+        <label>Early US owner
+          <select value={usStock.earlyRealizedOwnerId ?? "sugar"} onChange={(event) => updateSnapshot(["usStock", "earlyRealizedOwnerId"], event.target.value)}>
+            {(data.people ?? []).map((person) => <option key={person.id} value={person.id}>{person.name}</option>)}
+          </select>
+        </label>
+        <label>Fund current asset CNY
+          <input type="number" value={fund.currentAssetCny ?? ""} onChange={(event) => updateSnapshot(["fund", "currentAssetCny"], event.target.value)} />
+        </label>
         <label>美股初始本金 JPY
           <input type="number" value={data.assetSnapshots.usStock.principalJpy} onChange={(event) => updateSnapshot(["usStock", "principalJpy"], event.target.value)} />
         </label>
@@ -338,6 +364,7 @@ function AssetEditor({ data, setData }) {
             {dailyBalances.map((row, index) => (
               <tr key={row.id ?? `${row.date}-${index}`}>
                 <td><input type="date" value={row.date ?? ""} onChange={(event) => updateDaily(index, "date", event.target.value)} /></td>
+                <td><input type="number" value={row.ashareProfitCny ?? ""} onChange={(event) => updateDaily(index, "ashareProfitCny", event.target.value)} /></td>
                 <td><input type="number" value={row.ashareTotalCny ?? ""} onChange={(event) => updateDaily(index, "ashareTotalCny", event.target.value)} /></td>
                 <td><input type="number" value={row.usCurrentJpy ?? ""} onChange={(event) => updateDaily(index, "usCurrentJpy", event.target.value)} /></td>
                 <td><input type="number" step="0.0001" value={row.jpyCnyRate ?? ""} onChange={(event) => updateDaily(index, "jpyCnyRate", event.target.value)} /></td>

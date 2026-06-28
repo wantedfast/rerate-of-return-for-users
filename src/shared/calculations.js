@@ -7,6 +7,7 @@ import {
   PERSON_IDS,
   PERSON_NAME_BY_ID
 } from "./model.js";
+import { calculateAssetSummary } from "./assetSummary.js";
 
 function numberOrZero(value) {
   const numeric = Number(value);
@@ -69,6 +70,7 @@ function normalizeDailyBalances(input, assetSnapshots) {
       id: row.id ?? `daily-${index + 1}`,
       date: String(row.date ?? ""),
       ashareTotalCny: numberOrNull(row.ashareTotalCny),
+      ashareProfitCny: numberOrNull(row.ashareProfitCny),
       usCurrentJpy: numberOrNull(row.usCurrentJpy),
       jpyCnyRate: numberOrNull(row.jpyCnyRate),
       fundCurrentCny: numberOrNull(row.fundCurrentCny)
@@ -130,7 +132,7 @@ function getAshareRows(data) {
       id: row.id,
       date: row.date,
       totalCny: row.effectiveAshareTotalCny,
-      profit: null
+      profit: row.ashareProfitCny
     }));
   return rows.length ? rows : data.assetSnapshots.aShareDaily;
 }
@@ -149,7 +151,11 @@ export function normalizeInvestmentData(input = {}) {
       usStock: {
         principalJpy: numberOrZero(assetSnapshots.usStock?.principalJpy),
         currentAssetJpy: numberOrZero(assetSnapshots.usStock?.currentAssetJpy),
-        jpyCnyRate: numberOrZero(assetSnapshots.usStock?.jpyCnyRate)
+        jpyCnyRate: numberOrZero(assetSnapshots.usStock?.jpyCnyRate),
+        earlyRealizedPnlJpy: numberOrZero(assetSnapshots.usStock?.earlyRealizedPnlJpy),
+        laterRealizedPnlJpy: numberOrZero(assetSnapshots.usStock?.laterRealizedPnlJpy),
+        floatingPnlJpy: numberOrZero(assetSnapshots.usStock?.floatingPnlJpy),
+        earlyRealizedOwnerId: assetSnapshots.usStock?.earlyRealizedOwnerId ?? "sugar"
       },
       fund: {
         principalCny: numberOrZero(assetSnapshots.fund?.principalCny),
@@ -270,9 +276,11 @@ export function calculateAshareTimeline(input) {
     const flows = groupedFlows.get(row.date) ?? [];
     const deposits = flows.filter((flow) => flow.type === "deposit").reduce((sum, flow) => sum + numberOrZero(flow.amount), 0);
     const withdrawals = flows.filter((flow) => flow.type === "withdrawal").reduce((sum, flow) => sum + numberOrZero(flow.amount), 0);
-    const dailyProfit = row.totalCny === null
+    const dailyProfit = row.profit !== null && row.profit !== undefined
       ? numberOrZero(row.profit)
-      : numberOrZero(row.totalCny) - previousTotal - deposits + withdrawals;
+      : row.totalCny === null
+        ? 0
+        : numberOrZero(row.totalCny) - previousTotal - deposits + withdrawals;
 
     for (const flow of flows.filter((item) => item.timing === "pre")) {
       applyAshareFlow(balances, flow);
@@ -341,24 +349,58 @@ function allocateProfit(totalProfit, capitalByPerson) {
   return profitByPerson;
 }
 
+function positiveCapitalTotal(capitalByPerson) {
+  return PERSON_IDS.reduce((sum, personId) => sum + Math.max(0, capitalByPerson[personId] ?? 0), 0);
+}
+
 export function calculateFund(input) {
   const data = normalizeInvestmentData(input);
   const capitalByPerson = calculateAssetCapital(data, "fund");
-  const totalProfit = latestFundCurrentCny(data) - numberOrZero(data.assetSnapshots.fund.principalCny);
+  const flowPrincipal = positiveCapitalTotal(capitalByPerson);
+  const principal = flowPrincipal === 0 ? numberOrZero(data.assetSnapshots.fund.principalCny) : flowPrincipal;
+  const summary = calculateAssetSummary({
+    totalDeposit: principal,
+    totalWithdraw: 0,
+    currentAsset: latestFundCurrentCny(data)
+  });
   return {
-    byPerson: allocateProfit(totalProfit, capitalByPerson),
+    byPerson: allocateProfit(summary.profitLoss, capitalByPerson),
     capitalByPerson,
-    totalProfit
+    totalProfit: summary.profitLoss
   };
 }
 
 export function calculateUsStocks(input) {
   const data = normalizeInvestmentData(input);
   const capitalByPerson = calculateAssetCapital(data, "us");
-  const totalProfit = (
-    latestUsCurrentJpy(data) - numberOrZero(data.assetSnapshots.usStock.principalJpy)
-  ) * latestUsRate(data);
-  const byPerson = allocateProfit(totalProfit, capitalByPerson);
+  const stagedPnlJpy =
+    data.assetSnapshots.usStock.earlyRealizedPnlJpy
+    + data.assetSnapshots.usStock.laterRealizedPnlJpy
+    + data.assetSnapshots.usStock.floatingPnlJpy;
+  const hasStagedPnl = stagedPnlJpy !== 0;
+  const flowCapitalCny = positiveCapitalTotal(capitalByPerson);
+  const staticPrincipalCny = numberOrZero(data.assetSnapshots.usStock.principalJpy) * latestUsRate(data);
+  const principalCny = flowCapitalCny === 0 ? staticPrincipalCny : flowCapitalCny;
+  const unstagedSummary = calculateAssetSummary({
+    totalDeposit: principalCny,
+    totalWithdraw: 0,
+    currentAsset: latestUsCurrentJpy(data) * latestUsRate(data)
+  });
+  const totalProfit = hasStagedPnl
+    ? stagedPnlJpy * latestUsRate(data)
+    : unstagedSummary.profitLoss;
+  const byPerson = hasStagedPnl
+    ? allocateProfit(
+        (data.assetSnapshots.usStock.laterRealizedPnlJpy + data.assetSnapshots.usStock.floatingPnlJpy) * latestUsRate(data),
+        capitalByPerson
+      )
+    : allocateProfit(totalProfit, capitalByPerson);
+  if (hasStagedPnl) {
+    const earlyOwnerId = data.assetSnapshots.usStock.earlyRealizedOwnerId;
+    if (PERSON_IDS.includes(earlyOwnerId)) {
+      byPerson[earlyOwnerId] += data.assetSnapshots.usStock.earlyRealizedPnlJpy * latestUsRate(data);
+    }
+  }
   for (const personId of PERSON_IDS) {
     capitalByPerson[personId] += data.usAdjustments[personId].capitalCny;
     byPerson[personId] += data.usAdjustments[personId].profitCny;
