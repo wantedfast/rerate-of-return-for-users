@@ -856,6 +856,7 @@ function AdminApp({ token, onLogout }) {
   const dailyPerformance = useMemo(() => data ? calculateDailyPerformance(data) : null, [data]);
   const rows = useMemo(() => data ? calculateAll(data).summary : [], [data]);
   const fixedAllocationRows = useMemo(() => buildFixedAllocationRows(data, people), [data, people]);
+  const latestAccountRow = dailyPerformance?.accountRows.at(-1);
 
   function setNumber(path, rawValue) {
     setData((current) => updateNested(current, path, rawValue === "" ? 0 : Number(rawValue)));
@@ -1014,6 +1015,18 @@ function AdminApp({ token, onLogout }) {
       </header>
       {error ? <p className="error">{error}</p> : null}
       {status ? <p className="status">{status}</p> : null}
+
+      <section className="panel">
+        <h2>账户资产总览</h2>
+        <div className="metric-grid">
+          <div><span>最新日期</span><strong>{latestAccountRow?.date ?? "--"}</strong></div>
+          <div><span>A股总资产 CNY</span><strong>{money(latestAccountRow?.aShare?.endingAssetsCny)}</strong></div>
+          <div><span>A股当日盈亏 CNY</span><strong className={valueClass(latestAccountRow?.aShare?.dailyPnlCny)}>{money(latestAccountRow?.aShare?.dailyPnlCny)}</strong></div>
+          <div><span>美股总资产 JPY</span><strong>{money(latestAccountRow?.usStock?.endingAssetsJpy, 0)}</strong></div>
+          <div><span>美股总资产 CNY</span><strong>{money(latestAccountRow?.usStock?.endingAssetsCny)}</strong></div>
+          <div><span>美股当日盈亏 CNY</span><strong className={valueClass(latestAccountRow?.usStock?.dailyPnlCny)}>{money(latestAccountRow?.usStock?.dailyPnlCny)}</strong></div>
+        </div>
+      </section>
 
       <section className="panel">
         <h2>当前汇总</h2>

@@ -31,6 +31,13 @@ test("admin page keeps modal daily entry and confirmed summary modules", async (
   assert.match(source, /删除/);
   assert.match(source, /buildFixedAllocationRows/);
   assert.match(source, /fixedAllocationRows/);
+  assert.match(source, /latestAccountRow/);
+  assert.match(source, /账户资产总览/);
+  assert.match(source, /A股总资产 CNY/);
+  assert.match(source, /A股当日盈亏 CNY/);
+  assert.match(source, /美股总资产 JPY/);
+  assert.match(source, /美股总资产 CNY/);
+  assert.match(source, /美股当日盈亏 CNY/);
   assert.doesNotMatch(source, /成员收益汇总/);
   assert.doesNotMatch(source, /成员盈亏汇总/);
   assert.doesNotMatch(source, /成员每日明细/);
