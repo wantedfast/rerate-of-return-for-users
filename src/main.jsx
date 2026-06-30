@@ -427,7 +427,7 @@ function filterHistory(points, rangeKey, startDate, endDate) {
   return points.slice(-rangeDays);
 }
 
-function GlassHeader({ person, onLogout }) {
+function GlassHeader({ person, onLogout, onChangePassword }) {
   const displayName = person?.name ?? "投资者";
   return (
     <nav className="glass-header" aria-label="用户导航">
@@ -439,7 +439,10 @@ function GlassHeader({ person, onLogout }) {
           <em>欢迎回来</em>
         </div>
       </div>
-      <button className="glass-logout" onClick={onLogout}>退出登录</button>
+      <div className="glass-actions">
+        <button className="glass-logout" onClick={onChangePassword}>修改密码</button>
+        <button className="glass-logout" onClick={onLogout}>退出登录</button>
+      </div>
     </nav>
   );
 }
@@ -590,7 +593,7 @@ function GlassNotice() {
   );
 }
 
-function InvestmentDashboard({ person, onLogout }) {
+function InvestmentDashboard({ person, onLogout, onChangePassword }) {
   const summary = useMemo(() => ({
     principal: numberOrZero(person?.capital),
     totalProfitLoss: numberOrZero(person?.totalProfit),
@@ -600,7 +603,7 @@ function InvestmentDashboard({ person, onLogout }) {
 
   return (
     <main className="dashboard-shell">
-      <GlassHeader person={person} onLogout={onLogout} />
+      <GlassHeader person={person} onLogout={onLogout} onChangePassword={onChangePassword} />
       <section className="hero-panel">
         <span>投资者</span>
         <h1>投资收益总览</h1>
@@ -625,6 +628,71 @@ function InvestmentDashboard({ person, onLogout }) {
       <HistoryChart summary={summary} />
       <GlassNotice />
     </main>
+  );
+}
+
+function ChangePasswordModal({ token, onClose, onChanged }) {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [status, setStatus] = useState("");
+  const [error, setError] = useState("");
+
+  async function submit(event) {
+    event.preventDefault();
+    setError("");
+    setStatus("");
+
+    if (newPassword.length < 6) {
+      setError("新密码至少 6 位。");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError("两次输入的新密码不一致。");
+      return;
+    }
+
+    try {
+      await api(apiPath("/api/user/password"), {
+        method: "PUT",
+        token,
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+      setStatus("密码已修改，请重新登录。");
+      window.setTimeout(onChanged, 700);
+    } catch (changeError) {
+      setError(changeError.message);
+    }
+  }
+
+  return (
+    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="修改密码">
+      <form className="password-panel" onSubmit={submit}>
+        <div className="section-title">
+          <h2>修改密码</h2>
+          <button className="secondary" type="button" onClick={onClose}>关闭</button>
+        </div>
+        <label>
+          当前密码
+          <input type="password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} />
+        </label>
+        <label>
+          新密码
+          <input type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} />
+        </label>
+        <label>
+          确认新密码
+          <input type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} />
+        </label>
+        {error ? <p className="error">{error}</p> : null}
+        {status ? <p className="status">{status}</p> : null}
+        <div className="modal-actions">
+          <button className="secondary" type="button" onClick={onClose}>取消</button>
+          <button type="submit">保存新密码</button>
+        </div>
+      </form>
+    </div>
   );
 }
 
@@ -703,6 +771,7 @@ function SummaryTable({ rows }) {
 function UserApp({ token, onLogout }) {
   const [person, setPerson] = useState(null);
   const [error, setError] = useState("");
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   React.useEffect(() => {
     api(apiPath("/api/user/summary"), { token })
@@ -724,7 +793,22 @@ function UserApp({ token, onLogout }) {
     );
   }
 
-  return <InvestmentDashboard person={person} onLogout={onLogout} />;
+  return (
+    <>
+      <InvestmentDashboard
+        person={person}
+        onLogout={onLogout}
+        onChangePassword={() => setIsPasswordModalOpen(true)}
+      />
+      {isPasswordModalOpen ? (
+        <ChangePasswordModal
+          token={token}
+          onClose={() => setIsPasswordModalOpen(false)}
+          onChanged={onLogout}
+        />
+      ) : null}
+    </>
+  );
 }
 
 function updateNested(data, path, value) {

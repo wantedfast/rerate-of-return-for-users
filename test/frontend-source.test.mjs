@@ -49,8 +49,12 @@ test("user page renders liquid glass investment dashboard with history chart con
   const source = await fs.readFile(sourcePath, "utf8");
 
   assert.match(source, /from "recharts";/);
-  assert.match(source, /function InvestmentDashboard\(\{ person, onLogout \}\)/);
-  assert.match(source, /function GlassHeader\(\{ person, onLogout \}\)/);
+  assert.match(source, /function InvestmentDashboard\(\{ person, onLogout, onChangePassword \}\)/);
+  assert.match(source, /function GlassHeader\(\{ person, onLogout, onChangePassword \}\)/);
+  assert.match(source, /function ChangePasswordModal\(\{ token, onClose, onChanged \}\)/);
+  assert.match(source, /apiPath\("\/api\/user\/password"\)/);
+  assert.match(source, /修改密码/);
+  assert.match(source, /保存新密码/);
   assert.match(source, /function MetricCard\(\{ label, value, change, tone = "neutral" \}\)/);
   assert.match(source, /function RangeSelector\(\{ value, onChange \}\)/);
   assert.match(source, /function HistoryChart\(\{ summary \}\)/);
@@ -72,7 +76,7 @@ test("user page renders liquid glass investment dashboard with history chart con
   assert.match(source, /历史收益率/);
   assert.match(source, /开始日期/);
   assert.match(source, /结束日期/);
-  assert.match(source, /<InvestmentDashboard person=\{person\} onLogout=\{onLogout\} \/>/);
+  assert.match(source, /<InvestmentDashboard\s+person=\{person\}\s+onLogout=\{onLogout\}\s+onChangePassword=\{\(\) => setIsPasswordModalOpen\(true\)\}\s+\/>/);
   assert.doesNotMatch(source, /function UserSummaryTable/);
   assert.doesNotMatch(source, /<UserSummaryTable/);
 });

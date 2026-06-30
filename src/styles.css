@@ -344,6 +344,12 @@ th {
   width: 48px;
 }
 
+.glass-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
 .glass-logout {
   background: rgba(255, 255, 255, 0.48);
   border: 1px solid rgba(255, 255, 255, 0.76);
@@ -351,6 +357,19 @@ th {
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
   color: #1e293b;
   padding: 10px 16px;
+}
+
+.password-panel {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  border-radius: 18px;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.22);
+  display: grid;
+  gap: 16px;
+  max-width: 460px;
+  padding: 24px;
+  width: min(460px, 100%);
 }
 
 .hero-panel {
@@ -572,6 +591,12 @@ th {
   }
 
   .glass-logout {
+    width: 100%;
+  }
+
+  .glass-actions {
+    align-items: stretch;
+    flex-direction: column;
     width: 100%;
   }
 

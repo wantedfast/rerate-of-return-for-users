@@ -21,6 +21,10 @@ function requireRole(role, authSecret) {
   };
 }
 
+function isValidNewPassword(value) {
+  return typeof value === "string" && value.length >= 6 && value.length <= 128;
+}
+
 export function createApp(options = {}) {
   const dataDirectory = options.dataDirectory ?? fileURLToPath(new URL("../data", import.meta.url));
   const authSecret = options.authSecret ?? process.env.AUTH_SECRET ?? crypto.randomBytes(32).toString("hex");
@@ -81,6 +85,43 @@ export function createApp(options = {}) {
       return;
     }
     response.json({ person });
+  });
+
+  app.put("/api/user/password", requireRole("user", authSecret), async (request, response) => {
+    const { currentPassword, newPassword } = request.body ?? {};
+    if (!isValidNewPassword(newPassword)) {
+      response.status(400).json({ error: "New password must be 6-128 characters" });
+      return;
+    }
+
+    const data = await store.readData();
+    const personIndex = (data.people ?? []).findIndex((item) => item.id === request.session.personId);
+    if (personIndex < 0) {
+      response.status(404).json({ error: "Person not found" });
+      return;
+    }
+
+    if (data.people[personIndex].password !== currentPassword) {
+      response.status(400).json({ error: "Current password is incorrect" });
+      return;
+    }
+
+    data.people[personIndex] = {
+      ...data.people[personIndex],
+      password: newPassword
+    };
+
+    try {
+      const validatedData = validateInvestmentData(data);
+      await store.writeData(validatedData);
+      response.json({ ok: true });
+    } catch (error) {
+      if (error instanceof InvestmentDataValidationError) {
+        response.status(400).json({ error: error.message });
+        return;
+      }
+      throw error;
+    }
   });
 
   app.get("/api/health", (_request, response) => {
