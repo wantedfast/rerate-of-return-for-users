@@ -430,18 +430,17 @@ function filterHistory(points, rangeKey, startDate, endDate) {
 function GlassHeader({ person, onLogout, onChangePassword }) {
   const displayName = person?.name ?? "投资者";
   return (
-    <nav className="glass-header" aria-label="用户导航">
+    <nav className="dashboard-header" aria-label="用户导航">
       <div className="investor-profile">
         <div className="avatar-orb" aria-hidden="true">{displayName.slice(0, 1).toUpperCase()}</div>
         <div>
-          <span>投资者</span>
           <strong>{displayName}</strong>
-          <em>欢迎回来</em>
+          <span>投资者</span>
         </div>
       </div>
-      <div className="glass-actions">
-        <button className="glass-logout" onClick={onChangePassword}>修改密码</button>
-        <button className="glass-logout" onClick={onLogout}>退出登录</button>
+      <div className="header-actions">
+        <button className="header-button" onClick={onChangePassword}>修改密码</button>
+        <button className="header-button logout" onClick={onLogout}>退出登录</button>
       </div>
     </nav>
   );
@@ -450,9 +449,9 @@ function GlassHeader({ person, onLogout, onChangePassword }) {
 function MetricCard({ label, value, change, tone = "neutral" }) {
   return (
     <article className={`glass-card metric-card ${tone}`}>
-      <span>{label}</span>
-      <strong>{value}</strong>
-      {change ? <small>较昨日 {change}</small> : null}
+      <span className="metric-label">{label}</span>
+      <strong className={`metric-value ${label.includes("收益率") ? "percent" : ""}`}>{value}</strong>
+      {change ? <small className="metric-change">较昨日 {change}</small> : null}
     </article>
   );
 }
@@ -604,12 +603,6 @@ function InvestmentDashboard({ person, onLogout, onChangePassword }) {
   return (
     <main className="dashboard-shell">
       <GlassHeader person={person} onLogout={onLogout} onChangePassword={onChangePassword} />
-      <section className="hero-panel">
-        <span>投资者</span>
-        <h1>投资收益总览</h1>
-        <p>统计当前本金、累计盈亏与整体收益率</p>
-        <small>更新时间：{summary.updatedAt}</small>
-      </section>
 
       <section className="metrics-grid-dashboard" aria-label="核心指标">
         <MetricCard label="本金 CNY" value={yen(summary.principal)} />

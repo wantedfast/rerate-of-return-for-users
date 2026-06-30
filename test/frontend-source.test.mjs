@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import test from "node:test";
 
 const sourcePath = new URL("../src/main.jsx", import.meta.url);
+const stylesPath = new URL("../src/styles.css", import.meta.url);
 
 test("admin page keeps modal daily entry and confirmed summary modules", async () => {
   const source = await fs.readFile(sourcePath, "utf8");
@@ -76,7 +77,6 @@ test("user page renders liquid glass investment dashboard with history chart con
   assert.match(source, /const \[mode, setMode\] = useState\("returnRate"\);/);
   assert.match(source, /<input type="date" value=\{startDate\}/);
   assert.match(source, /<input type="date" value=\{endDate\}/);
-  assert.match(source, /投资收益总览/);
   assert.match(source, /本金 CNY/);
   assert.match(source, /总盈亏 CNY/);
   assert.match(source, /累计收益率/);
@@ -86,4 +86,35 @@ test("user page renders liquid glass investment dashboard with history chart con
   assert.match(source, /<InvestmentDashboard\s+person=\{person\}\s+onLogout=\{onLogout\}\s+onChangePassword=\{\(\) => setIsPasswordModalOpen\(true\)\}\s+\/>/);
   assert.doesNotMatch(source, /function UserSummaryTable/);
   assert.doesNotMatch(source, /<UserSummaryTable/);
+});
+
+test("user dashboard visual refresh uses modern sans font and lightweight glass hierarchy", async () => {
+  const source = await fs.readFile(sourcePath, "utf8");
+  const styles = await fs.readFile(stylesPath, "utf8");
+
+  assert.match(source, /className="dashboard-header"/);
+  assert.match(source, /className="header-actions"/);
+  assert.match(source, /className="header-button logout"/);
+  assert.doesNotMatch(source, /className="hero-section"/);
+  assert.doesNotMatch(source, /className="hero-title"/);
+  assert.doesNotMatch(source, /数据更新于 \{summary\.updatedAt\}/);
+  assert.doesNotMatch(source, /更新时间：\{summary\.updatedAt\}/);
+
+  assert.match(styles, /"PingFang SC"/);
+  assert.match(styles, /"Hiragino Sans GB"/);
+  assert.match(styles, /"Microsoft YaHei"/);
+  assert.match(styles, /-webkit-font-smoothing: antialiased/);
+  assert.match(styles, /text-rendering: optimizeLegibility/);
+  assert.match(styles, /\.dashboard-shell[\s\S]*max-width: 1280px/);
+  assert.match(styles, /\.dashboard-header[\s\S]*margin-bottom: 72px/);
+  assert.doesNotMatch(styles, /\.hero-title/);
+  assert.match(styles, /\.metrics-grid-dashboard[\s\S]*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);
+  assert.match(styles, /\.metric-value[\s\S]*font-variant-numeric: tabular-nums/);
+
+  assert.doesNotMatch(styles, /Songti/i);
+  assert.doesNotMatch(styles, /SimSun/i);
+  assert.doesNotMatch(styles, /Noto Serif/i);
+  assert.doesNotMatch(styles, /Georgia/i);
+  assert.doesNotMatch(styles, /Times New Roman/i);
+  assert.doesNotMatch(styles, /font-serif/i);
 });
