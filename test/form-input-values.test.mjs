@@ -17,6 +17,10 @@ test("decimal input text accepts editing states and rejects invalid text", () =>
   assert.equal(isDecimalInputText(""), true);
   assert.equal(isDecimalInputText("."), true);
   assert.equal(isDecimalInputText("0."), true);
+  assert.equal(isDecimalInputText("900."), true);
+  assert.equal(isDecimalInputText("900.5"), true);
+  assert.equal(isDecimalInputText("900.55"), true);
+  assert.equal(isDecimalInputText("0.01"), true);
   assert.equal(isDecimalInputText("0.05"), true);
   assert.equal(isDecimalInputText("-12.34"), true);
   assert.equal(isDecimalInputText("abc"), false);

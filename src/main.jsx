@@ -12,6 +12,7 @@ import {
 import { calculateAll } from "./shared/calculations.js";
 import { calculateDailyPerformance } from "./shared/dailySnapshots.js";
 import { appendDailySnapshot, calculateAShareBasis, initialDailyAccountAssets, sortDailySnapshotsByDate } from "./shared/dailySnapshotRows.js";
+import { updateDailySnapshotDraftField } from "./shared/dailySnapshotDrafts.js";
 import { buildFixedAllocationRows } from "./shared/fixedAllocation.js";
 import { inputNumberValue, isDecimalInputText } from "./shared/formInputValues.js";
 import "./styles.css";
@@ -260,13 +261,7 @@ function DailySnapshotModal({ data, draft, index, mode, onChange, onClose, onSav
     if (!isDecimalInputText(value)) {
       return;
     }
-    onChange((current) => ({
-      ...current,
-      [assetKey]: {
-        ...current[assetKey],
-        [field]: value
-      }
-    }));
+    onChange((current) => updateDailySnapshotDraftField(current, assetKey, field, value));
   }
 
   function setDate(value) {

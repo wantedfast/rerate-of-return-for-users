@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { calculateDailyPerformance } from "../src/shared/dailySnapshots.js";
 import { addOneDay } from "../src/shared/dailySnapshotRows.js";
+import { updateDailySnapshotDraftField } from "../src/shared/dailySnapshotDrafts.js";
 import { roundCurrency } from "../src/shared/calculations.js";
 
 function mockData(snapshot) {
@@ -90,4 +91,54 @@ test("modal save semantics are immutable: cancel keeps rows, save appends a new 
   assert.equal(saved.length, 2);
   assert.equal(saved.at(-1).date, "2026-06-25");
   assert.notEqual(saved, rows);
+});
+
+test("fund cash-flow edits adjust current assets by delta without treating deposits as losses", () => {
+  const baseDraft = {
+    date: "2026-06-25",
+    aShare: { beginningAssetsCny: 0, externalDepositCny: 0, externalWithdrawalCny: 0, transferInCny: 0, transferOutCny: 0, endingAssetsCny: 0 },
+    usStock: { beginningAssetsCny: 0, externalDepositJpy: 0, externalWithdrawalJpy: 0, transferInJpy: 0, transferOutJpy: 0, endingAssetsJpy: 0, jpyToCnyRate: 0.05 },
+    fund: { beginningAssetsCny: 6947.99, externalDepositCny: 0, externalWithdrawalCny: 0, transferInCny: 0, transferOutCny: 0, endingAssetsCny: 6947.99 }
+  };
+
+  const withDeposit = updateDailySnapshotDraftField(baseDraft, "fund", "externalDepositCny", "900");
+
+  assert.equal(withDeposit.fund.externalDepositCny, "900");
+  assert.equal(withDeposit.fund.endingAssetsCny, 7847.99);
+  assert.equal(baseDraft.fund.endingAssetsCny, 6947.99);
+
+  const savedSnapshot = {
+    ...withDeposit,
+    fund: {
+      ...withDeposit.fund,
+      externalDepositCny: Number(withDeposit.fund.externalDepositCny)
+    }
+  };
+  const data = mockData(savedSnapshot);
+  const row = calculateDailyPerformance(data).accountRows[0];
+
+  assert.equal(roundCurrency(row.fund.depositCny), 900);
+  assert.equal(roundCurrency(row.fund.endingAssetsCny), 7847.99);
+  assert.equal(roundCurrency(row.fund.dailyPnlCny), 0);
+  assert.equal(roundCurrency(row.fund.cumulativePnlCny), 0);
+  assert.equal(Number.isFinite(row.fund.cumulativeReturnRate), true);
+});
+
+test("fund cash-flow edits use the previous field value as delta and preserve decimal typing", () => {
+  const baseDraft = {
+    date: "2026-06-25",
+    fund: { externalDepositCny: 0, externalWithdrawalCny: 0, transferInCny: 0, transferOutCny: 0, endingAssetsCny: 6947.99 }
+  };
+
+  const withTrailingDot = updateDailySnapshotDraftField(baseDraft, "fund", "externalDepositCny", "900.");
+  const withDecimal = updateDailySnapshotDraftField(withTrailingDot, "fund", "externalDepositCny", "900.55");
+  const withWithdrawal = updateDailySnapshotDraftField(withDecimal, "fund", "externalWithdrawalCny", "0.01");
+  const clearedDeposit = updateDailySnapshotDraftField(withWithdrawal, "fund", "externalDepositCny", "");
+
+  assert.equal(withTrailingDot.fund.externalDepositCny, "900.");
+  assert.equal(withTrailingDot.fund.endingAssetsCny, 7847.99);
+  assert.equal(withDecimal.fund.externalDepositCny, "900.55");
+  assert.equal(withDecimal.fund.endingAssetsCny, 7848.54);
+  assert.equal(withWithdrawal.fund.endingAssetsCny, 7848.53);
+  assert.equal(clearedDeposit.fund.endingAssetsCny, 6947.98);
 });

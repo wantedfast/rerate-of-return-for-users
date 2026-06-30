@@ -15,10 +15,11 @@ test("admin page keeps modal daily entry and confirmed summary modules", async (
   assert.match(source, /upsertDailyBalance/);
   assert.match(source, /data\.assetSnapshots\.usStock\.floatingPnlJpy = rate/);
   assert.match(source, /import \{ inputNumberValue, isDecimalInputText \} from "\.\/shared\/formInputValues\.js";/);
+  assert.match(source, /import \{ updateDailySnapshotDraftField \} from "\.\/shared\/dailySnapshotDrafts\.js";/);
   assert.match(source, /if \(!isDecimalInputText\(value\)\)/);
   assert.match(source, /A股当前总资产 CNY（核对用）/);
   assert.match(source, /JPY\/CNY 汇率/);
-  assert.match(source, /\[field\]: value/);
+  assert.match(source, /updateDailySnapshotDraftField\(current, assetKey, field, value\)/);
   assert.match(source, /openDailySnapshotModal/);
   assert.match(source, /onClick=\{\(\) => openDailySnapshotModal\("new"\)\}>新增日期<\/button>/);
   assert.match(source, /saveDailySnapshotModal/);
