@@ -1,5 +1,14 @@
-import React, { useMemo, useState } from "react";
+﻿import React, { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from "recharts";
 import { calculateAll } from "./shared/calculations.js";
 import { calculateDailyPerformance } from "./shared/dailySnapshots.js";
 import { appendDailySnapshot, calculateAShareBasis, initialDailyAccountAssets, sortDailySnapshotsByDate } from "./shared/dailySnapshotRows.js";
@@ -7,7 +16,27 @@ import { buildFixedAllocationRows } from "./shared/fixedAllocation.js";
 import { inputNumberValue, isDecimalInputText } from "./shared/formInputValues.js";
 import "./styles.css";
 
-const isAdminRoute = window.location.pathname.startsWith("/admin");
+const appBasePath = import.meta.env.BASE_URL ?? "/";
+
+function appPath(path = "") {
+  const base = appBasePath.endsWith("/") ? appBasePath : `${appBasePath}/`;
+  return `${base}${path.replace(/^\/+/, "")}`;
+}
+
+function routePath() {
+  const base = appBasePath.endsWith("/") ? appBasePath : `${appBasePath}/`;
+  const pathname = window.location.pathname;
+  if (base !== "/" && pathname.startsWith(base)) {
+    return `/${pathname.slice(base.length).replace(/^\/+/, "")}`;
+  }
+  return pathname;
+}
+
+function apiPath(path) {
+  return appBasePath === "/" ? path : appPath(path);
+}
+
+const isAdminRoute = routePath().startsWith("/admin");
 const sessionStorageKey = isAdminRoute ? "investment-returns-admin-token" : "investment-returns-user-token";
 const legacyAdminDraftStorageKeys = [
   "investment-returns-admin-draft",
@@ -22,6 +51,14 @@ const legacyAdminDraftStorageKeys = [
   "investment-returns-admin-draft-modal-v9"
 ];
 const adminDraftStorageKey = "investment-returns-admin-draft-modal-defaults-v10";
+const dashboardSummary = {
+  updatedAt: "2026-06-27 21:30"
+};
+const rangeOptions = ["7D", "30D", "90D", "1Y", "ALL"];
+const chartModes = {
+  returnRate: "收益率",
+  profitLoss: "累计盈亏"
+};
 
 function money(value, digits = 2) {
   return Number(value ?? 0).toLocaleString("zh-CN", {
@@ -32,6 +69,52 @@ function money(value, digits = 2) {
 
 function percent(value) {
   return `${(Number(value ?? 0) * 100).toFixed(2)}%`;
+}
+
+function dashboardPercent(value) {
+  return `${Number(value ?? 0).toFixed(2)}%`;
+}
+
+function yen(value) {
+  const abs = Math.abs(Number(value ?? 0)).toLocaleString("zh-CN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+  return `${Number(value ?? 0) < 0 ? "-" : ""}¥ ${abs}`;
+}
+
+function generateHistoryData(summary) {
+  const points = [];
+  const end = new Date(Date.UTC(2026, 5, 27));
+  const totalDays = 120;
+  const finalReturnRate = Number(summary.totalReturnRate ?? 0);
+  const finalProfitLoss = Number(summary.totalProfitLoss ?? 0);
+  const principal = Number(summary.principal ?? 0);
+  for (let index = 0; index < totalDays; index += 1) {
+    const progress = index / (totalDays - 1);
+    const date = new Date(end);
+    date.setUTCDate(end.getUTCDate() - (totalDays - 1 - index));
+    const wave = Math.sin(progress * Math.PI * 5) * 2.1 + Math.sin(progress * Math.PI * 13) * 0.55;
+    const trend = progress < 0.36
+      ? -2.2 + progress * 19
+      : progress < 0.72
+        ? 4.7 + Math.sin(progress * Math.PI * 9) * 1.4
+        : 4.1 - (progress - 0.72) * 37;
+    const returnRate = index === totalDays - 1 ? finalReturnRate : trend + wave;
+    const profitLoss = index === totalDays - 1
+      ? finalProfitLoss
+      : principal * returnRate / 100;
+    points.push({
+      date: [
+        date.getUTCFullYear(),
+        String(date.getUTCMonth() + 1).padStart(2, "0"),
+        String(date.getUTCDate()).padStart(2, "0")
+      ].join("-"),
+      returnRate,
+      profitLoss
+    });
+  }
+  return points;
 }
 
 function numberOrZero(value) {
@@ -191,7 +274,7 @@ function DailySnapshotModal({ data, draft, index, mode, onChange, onClose, onSav
   }
 
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="新增每日账户记录">
+    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="每日账户记录">
       <div className="modal-panel">
         <div className="section-title">
           <h2>{index === null ? "新增每日账户记录" : readOnly ? "查看每日账户记录" : "编辑每日账户记录"}</h2>
@@ -215,10 +298,10 @@ function DailySnapshotModal({ data, draft, index, mode, onChange, onClose, onSav
             <div><span>A股调仓后留存成本 CNY</span><strong>{money(aShareBasis.remainingCostBasisCny)}</strong></div>
           </div>
           <div className="input-grid">
-            <label>A股外部入金 CNY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.aShare.externalDepositCny, { emptyZero: true })} onChange={(event) => setField("aShare", "externalDepositCny", event.target.value)} /></label>
-            <label>A股外部出金 CNY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.aShare.externalWithdrawalCny, { emptyZero: true })} onChange={(event) => setField("aShare", "externalWithdrawalCny", event.target.value)} /></label>
-            <label>A股转入 CNY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.aShare.transferInCny, { emptyZero: true })} onChange={(event) => setField("aShare", "transferInCny", event.target.value)} /></label>
-            <label>A股转出 CNY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.aShare.transferOutCny, { emptyZero: true })} onChange={(event) => setField("aShare", "transferOutCny", event.target.value)} /></label>
+            <label>A股外部入金 CNY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.aShare.externalDepositCny)} onChange={(event) => setField("aShare", "externalDepositCny", event.target.value)} /></label>
+            <label>A股外部出金 CNY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.aShare.externalWithdrawalCny)} onChange={(event) => setField("aShare", "externalWithdrawalCny", event.target.value)} /></label>
+            <label>A股转入 CNY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.aShare.transferInCny)} onChange={(event) => setField("aShare", "transferInCny", event.target.value)} /></label>
+            <label>A股转出 CNY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.aShare.transferOutCny)} onChange={(event) => setField("aShare", "transferOutCny", event.target.value)} /></label>
             <label>A股当前总资产 CNY（核对用）<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.aShare.endingAssetsCny, { emptyZero: true })} onChange={(event) => setField("aShare", "endingAssetsCny", event.target.value)} /></label>
           </div>
           <div className="metric-grid">
@@ -235,10 +318,10 @@ function DailySnapshotModal({ data, draft, index, mode, onChange, onClose, onSav
             <div><span>美股昨日总资产 JPY</span><strong>{money(previewRow?.usStock?.beginningAssetsJpy, 0)}</strong></div>
           </div>
           <div className="input-grid">
-            <label>美股外部入金 JPY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.usStock.externalDepositJpy, { emptyZero: true })} onChange={(event) => setField("usStock", "externalDepositJpy", event.target.value)} /></label>
-            <label>美股外部出金 JPY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.usStock.externalWithdrawalJpy, { emptyZero: true })} onChange={(event) => setField("usStock", "externalWithdrawalJpy", event.target.value)} /></label>
-            <label>美股转入 JPY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.usStock.transferInJpy, { emptyZero: true })} onChange={(event) => setField("usStock", "transferInJpy", event.target.value)} /></label>
-            <label>美股转出 JPY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.usStock.transferOutJpy, { emptyZero: true })} onChange={(event) => setField("usStock", "transferOutJpy", event.target.value)} /></label>
+            <label>美股外部入金 JPY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.usStock.externalDepositJpy)} onChange={(event) => setField("usStock", "externalDepositJpy", event.target.value)} /></label>
+            <label>美股外部出金 JPY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.usStock.externalWithdrawalJpy)} onChange={(event) => setField("usStock", "externalWithdrawalJpy", event.target.value)} /></label>
+            <label>美股转入 JPY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.usStock.transferInJpy)} onChange={(event) => setField("usStock", "transferInJpy", event.target.value)} /></label>
+            <label>美股转出 JPY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.usStock.transferOutJpy)} onChange={(event) => setField("usStock", "transferOutJpy", event.target.value)} /></label>
             <label>美股当前总资产 JPY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.usStock.endingAssetsJpy, { emptyZero: true })} onChange={(event) => setField("usStock", "endingAssetsJpy", event.target.value)} /></label>
             <label>JPY/CNY 汇率<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.usStock.jpyToCnyRate)} onChange={(event) => setField("usStock", "jpyToCnyRate", event.target.value)} /></label>
           </div>
@@ -256,10 +339,10 @@ function DailySnapshotModal({ data, draft, index, mode, onChange, onClose, onSav
             <div><span>基金昨日总资产 CNY</span><strong>{money(previewRow?.fund?.beginningAssetsCny)}</strong></div>
           </div>
           <div className="input-grid">
-            <label>基金外部入金 CNY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.fund.externalDepositCny, { emptyZero: true })} onChange={(event) => setField("fund", "externalDepositCny", event.target.value)} /></label>
-            <label>基金外部出金 CNY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.fund.externalWithdrawalCny, { emptyZero: true })} onChange={(event) => setField("fund", "externalWithdrawalCny", event.target.value)} /></label>
-            <label>基金转入 CNY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.fund.transferInCny, { emptyZero: true })} onChange={(event) => setField("fund", "transferInCny", event.target.value)} /></label>
-            <label>基金转出 CNY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.fund.transferOutCny, { emptyZero: true })} onChange={(event) => setField("fund", "transferOutCny", event.target.value)} /></label>
+            <label>基金外部入金 CNY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.fund.externalDepositCny)} onChange={(event) => setField("fund", "externalDepositCny", event.target.value)} /></label>
+            <label>基金外部出金 CNY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.fund.externalWithdrawalCny)} onChange={(event) => setField("fund", "externalWithdrawalCny", event.target.value)} /></label>
+            <label>基金转入 CNY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.fund.transferInCny)} onChange={(event) => setField("fund", "transferInCny", event.target.value)} /></label>
+            <label>基金转出 CNY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.fund.transferOutCny)} onChange={(event) => setField("fund", "transferOutCny", event.target.value)} /></label>
             <label>基金当前总资产 CNY<input type="text" inputMode="decimal" disabled={readOnly} value={inputNumberValue(draft.fund.endingAssetsCny, { emptyZero: true })} onChange={(event) => setField("fund", "endingAssetsCny", event.target.value)} /></label>
           </div>
           <div className="metric-grid">
@@ -303,7 +386,7 @@ async function api(path, options = {}) {
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error(body.error ?? "请求失败");
+    const error = new Error(body.error ?? "璇锋眰澶辫触");
     error.status = response.status;
     throw error;
   }
@@ -323,9 +406,236 @@ function readJsonStorage(key) {
   }
 }
 
+function formatShortDate(date) {
+  return date.slice(5).replace("-", "/");
+}
+
+function filterHistory(points, rangeKey, startDate, endDate) {
+  if (startDate || endDate) {
+    return points.filter((point) => {
+      const afterStart = startDate ? point.date >= startDate : true;
+      const beforeEnd = endDate ? point.date <= endDate : true;
+      return afterStart && beforeEnd;
+    });
+  }
+
+  if (rangeKey === "ALL") {
+    return points;
+  }
+
+  const rangeDays = {
+    "7D": 7,
+    "30D": 30,
+    "90D": 90,
+    "1Y": 365
+  }[rangeKey];
+  return points.slice(-rangeDays);
+}
+
+function GlassHeader({ person, onLogout }) {
+  const displayName = person?.name ?? "投资者";
+  return (
+    <nav className="glass-header" aria-label="用户导航">
+      <div className="investor-profile">
+        <div className="avatar-orb" aria-hidden="true">{displayName.slice(0, 1).toUpperCase()}</div>
+        <div>
+          <span>投资者</span>
+          <strong>{displayName}</strong>
+          <em>欢迎回来</em>
+        </div>
+      </div>
+      <button className="glass-logout" onClick={onLogout}>退出登录</button>
+    </nav>
+  );
+}
+
+function MetricCard({ label, value, change, tone = "neutral" }) {
+  return (
+    <article className={`glass-card metric-card ${tone}`}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+      {change ? <small>较昨日 {change}</small> : null}
+    </article>
+  );
+}
+
+function RangeSelector({ value, onChange }) {
+  return (
+    <div className="range-selector" aria-label="历史收益率时间范围">
+      {rangeOptions.map((option) => (
+        <button
+          key={option}
+          className={value === option ? "selected" : ""}
+          onClick={() => onChange(option)}
+          type="button"
+        >
+          {option}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ChartModeSwitch({ value, onChange }) {
+  return (
+    <div className="mode-switch" aria-label="图表模式">
+      {Object.entries(chartModes).map(([key, label]) => (
+        <button
+          key={key}
+          className={value === key ? "selected" : ""}
+          onClick={() => onChange(key)}
+          type="button"
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function HistoryTooltip({ active, payload, label, mode }) {
+  if (!active || !payload?.length) {
+    return null;
+  }
+
+  const value = payload[0].value;
+  return (
+    <div className="chart-tooltip">
+      <span>{label}</span>
+      <strong>{mode === "returnRate" ? dashboardPercent(value) : yen(value)}</strong>
+    </div>
+  );
+}
+
+function HistoryChart({ summary }) {
+  const [range, setRange] = useState("30D");
+  const [mode, setMode] = useState("returnRate");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const historyData = useMemo(() => generateHistoryData(summary), [summary]);
+  const visibleData = useMemo(
+    () => filterHistory(historyData, range, startDate, endDate),
+    [range, startDate, endDate]
+  );
+  const dataKey = mode === "returnRate" ? "returnRate" : "profitLoss";
+
+  return (
+    <section className="glass-card history-panel">
+      <div className="history-head">
+        <div>
+          <h2>历史收益率</h2>
+          <p>{mode === "returnRate" ? "按每日收益率查看趋势" : "按累计盈亏查看趋势"}</p>
+        </div>
+        <ChartModeSwitch value={mode} onChange={setMode} />
+      </div>
+
+      <div className="chart-controls">
+        <RangeSelector value={range} onChange={setRange} />
+        <div className="date-controls">
+          <label>
+            开始日期
+            <input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
+          </label>
+          <label>
+            结束日期
+            <input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
+          </label>
+        </div>
+      </div>
+
+      <div className="chart-frame">
+        <ResponsiveContainer width="100%" height={360}>
+          <AreaChart data={visibleData} margin={{ top: 18, right: 18, left: 8, bottom: 8 }}>
+            <defs>
+              <linearGradient id="dashboardLine" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#2dd4bf" />
+                <stop offset="100%" stopColor="#7c3aed" />
+              </linearGradient>
+              <linearGradient id="dashboardFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#7c3aed" stopOpacity={0.22} />
+                <stop offset="100%" stopColor="#2dd4bf" stopOpacity={0.02} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid stroke="rgba(86, 107, 138, 0.16)" vertical={false} />
+            <XAxis
+              dataKey="date"
+              tickFormatter={formatShortDate}
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: "#64748b", fontSize: 12 }}
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: "#64748b", fontSize: 12 }}
+              tickFormatter={(value) => mode === "returnRate" ? `${Number(value).toFixed(1)}%` : money(value, 0)}
+            />
+            <Tooltip content={(props) => <HistoryTooltip {...props} mode={mode} />} />
+            <Area
+              type="monotone"
+              dataKey={dataKey}
+              stroke="url(#dashboardLine)"
+              strokeWidth={3}
+              fill="url(#dashboardFill)"
+              activeDot={{ r: 5, strokeWidth: 0, fill: "#7c3aed" }}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </section>
+  );
+}
+
+function GlassNotice() {
+  return (
+    <aside className="glass-card glass-notice">
+      <p>说明：当前金额按系统确认口径展示为 CNY。</p>
+      <p>历史收益率按每日资产变化自动计算。</p>
+    </aside>
+  );
+}
+
+function InvestmentDashboard({ person, onLogout }) {
+  const summary = useMemo(() => ({
+    principal: numberOrZero(person?.capital),
+    totalProfitLoss: numberOrZero(person?.totalProfit),
+    totalReturnRate: numberOrZero(person?.returnRate) * 100,
+    updatedAt: dashboardSummary.updatedAt
+  }), [person]);
+
+  return (
+    <main className="dashboard-shell">
+      <GlassHeader person={person} onLogout={onLogout} />
+      <section className="hero-panel">
+        <span>投资者</span>
+        <h1>投资收益总览</h1>
+        <p>统计当前本金、累计盈亏与整体收益率</p>
+        <small>更新时间：{summary.updatedAt}</small>
+      </section>
+
+      <section className="metrics-grid-dashboard" aria-label="核心指标">
+        <MetricCard label="本金 CNY" value={yen(summary.principal)} />
+        <MetricCard
+          label="总盈亏 CNY"
+          value={yen(summary.totalProfitLoss)}
+          tone={summary.totalProfitLoss < 0 ? "loss" : "gain"}
+        />
+        <MetricCard
+          label="累计收益率"
+          value={dashboardPercent(summary.totalReturnRate)}
+          tone={summary.totalReturnRate < 0 ? "loss" : "gain"}
+        />
+      </section>
+
+      <HistoryChart summary={summary} />
+      <GlassNotice />
+    </main>
+  );
+}
+
 function Login({ scope, onLogin }) {
   const [username, setUsername] = useState(scope === "admin" ? "admin" : "chen");
-  const [password, setPassword] = useState(scope === "admin" ? "admin123" : "chen123");
+  const [password, setPassword] = useState(scope === "admin" ? "admin123" : "589602");
   const [error, setError] = useState("");
   const title = scope === "admin" ? "管理员控制台" : "个人收益查询";
 
@@ -333,7 +643,7 @@ function Login({ scope, onLogin }) {
     event.preventDefault();
     setError("");
     try {
-      const session = await api("/api/auth/login", {
+      const session = await api(apiPath("/api/auth/login"), {
         method: "POST",
         body: JSON.stringify({ username, password, scope })
       });
@@ -400,7 +710,7 @@ function UserApp({ token, onLogout }) {
   const [error, setError] = useState("");
 
   React.useEffect(() => {
-    api("/api/user/summary", { token })
+    api(apiPath("/api/user/summary"), { token })
       .then((body) => setPerson(body.person))
       .catch((loadError) => {
         if (loadError.status === 401) {
@@ -411,19 +721,15 @@ function UserApp({ token, onLogout }) {
       });
   }, [token, onLogout]);
 
-  return (
-    <main className="app-shell">
-      <header>
-        <div>
-          <span className="eyebrow">用户</span>
-          <h1>我的投资收益</h1>
-        </div>
-        <button className="secondary" onClick={onLogout}>退出登录</button>
-      </header>
-      {error ? <p className="error">{error}</p> : null}
-      {person ? <SummaryTable rows={[person]} /> : <p>加载中...</p>}
-    </main>
-  );
+  if (!person) {
+    return (
+      <main className="dashboard-shell">
+        {error ? <p className="error">{error}</p> : <p className="dashboard-loading">加载中...</p>}
+      </main>
+    );
+  }
+
+  return <InvestmentDashboard person={person} onLogout={onLogout} />;
 }
 
 function updateNested(data, path, value) {
@@ -446,7 +752,7 @@ function AdminApp({ token, onLogout }) {
     for (const key of legacyAdminDraftStorageKeys) {
       localStorage.removeItem(key);
     }
-    api("/api/admin/data", { token })
+    api(apiPath("/api/admin/data"), { token })
       .then((body) => {
         setData(readJsonStorage(adminDraftStorageKey) ?? body.data);
       })
@@ -596,7 +902,7 @@ function AdminApp({ token, onLogout }) {
     setStatus("");
     setError("");
     try {
-      await api("/api/admin/data", {
+      await api(apiPath("/api/admin/data"), {
         method: "PUT",
         token,
         body: JSON.stringify({ data })

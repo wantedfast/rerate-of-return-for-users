@@ -250,6 +250,302 @@ th {
   font-weight: 700;
 }
 
+.dashboard-shell {
+  background:
+    radial-gradient(circle at 10% 20%, rgba(80, 180, 255, 0.22), transparent 30%),
+    radial-gradient(circle at 80% 10%, rgba(160, 120, 255, 0.20), transparent 28%),
+    radial-gradient(circle at 70% 80%, rgba(80, 255, 220, 0.16), transparent 32%),
+    linear-gradient(135deg, #f8fbff 0%, #eef5ff 50%, #f8f7ff 100%);
+  color: #0f172a;
+  min-height: 100vh;
+  overflow: hidden auto;
+  padding: 28px clamp(18px, 4vw, 56px) 42px;
+}
+
+.dashboard-shell::before {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.08));
+  content: "";
+  height: 260px;
+  left: -70px;
+  position: fixed;
+  top: -110px;
+  transform: rotate(-14deg);
+  width: 520px;
+  z-index: 0;
+}
+
+.dashboard-shell > * {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1180px;
+  position: relative;
+  z-index: 1;
+}
+
+.glass-header {
+  background: rgba(255, 255, 255, 0.56);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 28px;
+  box-shadow:
+    0 20px 60px rgba(31, 38, 135, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.84);
+  justify-content: space-between;
+  padding: 14px 16px;
+}
+
+.investor-profile {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.investor-profile div:last-child {
+  display: grid;
+  gap: 1px;
+}
+
+.investor-profile span,
+.hero-panel span,
+.metric-card span,
+.history-head p,
+.glass-notice p,
+.metric-card small {
+  color: #64748b;
+}
+
+.investor-profile span,
+.hero-panel span {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.investor-profile strong {
+  color: #0f172a;
+  font-size: 17px;
+}
+
+.investor-profile em {
+  color: #526070;
+  font-style: normal;
+  font-size: 13px;
+}
+
+.avatar-orb {
+  align-items: center;
+  background: linear-gradient(135deg, #5eead4, #7c3aed);
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: 50%;
+  box-shadow: 0 12px 30px rgba(124, 58, 237, 0.22);
+  color: white;
+  display: grid;
+  font-weight: 900;
+  height: 48px;
+  width: 48px;
+}
+
+.glass-logout {
+  background: rgba(255, 255, 255, 0.48);
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  color: #1e293b;
+  padding: 10px 16px;
+}
+
+.hero-panel {
+  padding: 60px 4px 24px;
+}
+
+.hero-panel h1 {
+  font-size: clamp(38px, 7vw, 76px);
+  letter-spacing: 0;
+  line-height: 0.98;
+  margin: 8px 0 14px;
+}
+
+.hero-panel p {
+  color: #334155;
+  font-size: clamp(17px, 2vw, 22px);
+  margin-bottom: 12px;
+}
+
+.hero-panel small {
+  color: #64748b;
+  font-weight: 700;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.48);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 28px;
+  box-shadow:
+    0 20px 60px rgba(31, 38, 135, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+  position: relative;
+}
+
+.glass-card::before {
+  background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.18));
+  content: "";
+  height: 1px;
+  left: 22px;
+  position: absolute;
+  right: 22px;
+  top: 0;
+}
+
+.metrics-grid-dashboard {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.metric-card {
+  display: grid;
+  gap: 12px;
+  min-height: 170px;
+  padding: 24px;
+}
+
+.metric-card span {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.metric-card strong {
+  color: #0f172a;
+  font-size: clamp(30px, 4vw, 44px);
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.metric-card small {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.metric-card.loss strong,
+.metric-card.loss small {
+  color: #6d28d9;
+}
+
+.history-panel {
+  margin-top: 18px;
+  padding: 24px;
+}
+
+.history-head,
+.chart-controls {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.history-head h2 {
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+
+.history-head p {
+  margin-bottom: 0;
+}
+
+.range-selector,
+.mode-switch {
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  display: flex;
+  gap: 4px;
+  padding: 5px;
+}
+
+.range-selector button,
+.mode-switch button {
+  background: transparent;
+  border-radius: 999px;
+  color: #475569;
+  padding: 8px 12px;
+}
+
+.range-selector button.selected,
+.mode-switch button.selected {
+  background: linear-gradient(135deg, rgba(45, 212, 191, 0.9), rgba(124, 58, 237, 0.88));
+  box-shadow: 0 10px 24px rgba(124, 58, 237, 0.24);
+  color: white;
+}
+
+.chart-controls {
+  margin-top: 22px;
+}
+
+.date-controls {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(150px, 1fr));
+}
+
+.date-controls label {
+  color: #475569;
+}
+
+.date-controls input {
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  border-radius: 16px;
+}
+
+.chart-frame {
+  height: 380px;
+  margin-top: 20px;
+}
+
+.chart-tooltip {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  border-radius: 16px;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12);
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+}
+
+.chart-tooltip span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.chart-tooltip strong {
+  color: #0f172a;
+}
+
+.glass-notice {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-top: 18px;
+  padding: 18px 22px;
+}
+
+.glass-notice p {
+  font-weight: 700;
+  margin: 0;
+}
+
+.dashboard-loading {
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 800;
+  padding-top: 80px;
+  text-align: center;
+}
+
 @media (max-width: 720px) {
   .app-shell {
     padding: 16px;
@@ -258,5 +554,51 @@ th {
   header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .dashboard-shell {
+    padding: 16px;
+  }
+
+  .glass-header,
+  .history-head,
+  .chart-controls,
+  .glass-notice {
+    flex-direction: column;
+  }
+
+  .glass-header {
+    align-items: stretch;
+  }
+
+  .glass-logout {
+    width: 100%;
+  }
+
+  .hero-panel {
+    padding-top: 38px;
+  }
+
+  .metrics-grid-dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .range-selector {
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  .range-selector button {
+    min-width: 58px;
+  }
+
+  .mode-switch,
+  .date-controls {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .chart-frame {
+    height: 330px;
   }
 }

@@ -4,7 +4,7 @@ import test from "node:test";
 
 const sourcePath = new URL("../src/main.jsx", import.meta.url);
 
-test("admin page uses modal daily entry, compact daily table, and fixed allocation modules", async () => {
+test("admin page keeps modal daily entry and confirmed summary modules", async () => {
   const source = await fs.readFile(sourcePath, "utf8");
 
   assert.match(source, /每日账户录入/);
@@ -16,17 +16,15 @@ test("admin page uses modal daily entry, compact daily table, and fixed allocati
   assert.match(source, /data\.assetSnapshots\.usStock\.floatingPnlJpy = rate/);
   assert.match(source, /import \{ inputNumberValue, isDecimalInputText \} from "\.\/shared\/formInputValues\.js";/);
   assert.match(source, /if \(!isDecimalInputText\(value\)\)/);
-  assert.match(source, /A股当前总资产 CNY（核对用）<input type="text" inputMode="decimal" disabled=\{readOnly\} value=\{inputNumberValue\(draft\.aShare\.endingAssetsCny, \{ emptyZero: true \}\)\}/);
-  assert.match(source, /JPY\/CNY 汇率<input type="text" inputMode="decimal" disabled=\{readOnly\} value=\{inputNumberValue\(draft\.usStock\.jpyToCnyRate\)\}/);
+  assert.match(source, /A股当前总资产 CNY（核对用）/);
+  assert.match(source, /JPY\/CNY 汇率/);
   assert.match(source, /\[field\]: value/);
   assert.match(source, /openDailySnapshotModal/);
-  assert.match(source, /onClick=\{\(\) => openDailySnapshotModal\("new"\)\}/);
+  assert.match(source, /onClick=\{\(\) => openDailySnapshotModal\("new"\)\}>新增日期<\/button>/);
   assert.match(source, /saveDailySnapshotModal/);
   assert.match(source, /新增每日账户记录/);
-  assert.match(source, /A股当前总资产 CNY（核对用）/);
   assert.match(source, /A股调仓后留存成本 CNY/);
   assert.match(source, /美股当前总资产 JPY/);
-  assert.match(source, /JPY\/CNY 汇率/);
   assert.match(source, /查看/);
   assert.match(source, /编辑/);
   assert.match(source, /删除/);
@@ -44,4 +42,36 @@ test("admin page uses modal daily entry, compact daily table, and fixed allocati
   assert.doesNotMatch(source, /allocation-bar/);
   assert.doesNotMatch(source, /\["assetSnapshots", "usStock", "earlyRealizedOwnerId"\]/);
   assert.doesNotMatch(source, /calculations\?\.summary/);
+});
+
+test("user page renders liquid glass investment dashboard with history chart controls", async () => {
+  const source = await fs.readFile(sourcePath, "utf8");
+
+  assert.match(source, /from "recharts";/);
+  assert.match(source, /function InvestmentDashboard\(\{ person, onLogout \}\)/);
+  assert.match(source, /function GlassHeader\(\{ person, onLogout \}\)/);
+  assert.match(source, /function MetricCard\(\{ label, value, change, tone = "neutral" \}\)/);
+  assert.match(source, /function RangeSelector\(\{ value, onChange \}\)/);
+  assert.match(source, /function HistoryChart\(\{ summary \}\)/);
+  assert.match(source, /function GlassNotice\(\)/);
+  assert.match(source, /const dashboardSummary = \{/);
+  assert.match(source, /const historyData = useMemo\(\(\) => generateHistoryData\(summary\), \[summary\]\);/);
+  assert.match(source, /principal: numberOrZero\(person\?\.capital\)/);
+  assert.match(source, /totalProfitLoss: numberOrZero\(person\?\.totalProfit\)/);
+  assert.match(source, /totalReturnRate: numberOrZero\(person\?\.returnRate\) \* 100/);
+  assert.match(source, /const rangeOptions = \["7D", "30D", "90D", "1Y", "ALL"\];/);
+  assert.match(source, /const \[range, setRange\] = useState\("30D"\);/);
+  assert.match(source, /const \[mode, setMode\] = useState\("returnRate"\);/);
+  assert.match(source, /<input type="date" value=\{startDate\}/);
+  assert.match(source, /<input type="date" value=\{endDate\}/);
+  assert.match(source, /投资收益总览/);
+  assert.match(source, /本金 CNY/);
+  assert.match(source, /总盈亏 CNY/);
+  assert.match(source, /累计收益率/);
+  assert.match(source, /历史收益率/);
+  assert.match(source, /开始日期/);
+  assert.match(source, /结束日期/);
+  assert.match(source, /<InvestmentDashboard person=\{person\} onLogout=\{onLogout\} \/>/);
+  assert.doesNotMatch(source, /function UserSummaryTable/);
+  assert.doesNotMatch(source, /<UserSummaryTable/);
 });

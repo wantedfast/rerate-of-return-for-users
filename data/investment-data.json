@@ -1,12 +1,35 @@
 {
   "people": [
-    { "id": "wang", "name": "王欣隆", "password": "wang123" },
-    { "id": "chen", "name": "Chen", "password": "chen123" },
-    { "id": "nanjing", "name": "南京哥", "password": "nanjing123" },
-    { "id": "garlicm", "name": "Garlicm", "password": "garlicm123" },
-    { "id": "sugar", "name": "糖", "password": "sugar123" }
+    {
+      "id": "wang",
+      "name": "王欣隆",
+      "password": "589602"
+    },
+    {
+      "id": "chen",
+      "name": "Chen",
+      "password": "589602"
+    },
+    {
+      "id": "nanjing",
+      "name": "南京哥",
+      "password": "589602"
+    },
+    {
+      "id": "garlicm",
+      "name": "Garlicm",
+      "password": "589602"
+    },
+    {
+      "id": "sugar",
+      "name": "糖",
+      "password": "589602"
+    }
   ],
-  "admin": { "username": "admin", "password": "admin123" },
+  "admin": {
+    "username": "admin",
+    "password": "admin123"
+  },
   "totalCapitalTargets": {
     "wang": 20836.37,
     "chen": 5000,
@@ -16,7 +39,11 @@
   },
   "assetSnapshots": {
     "ashare": {
-      "commonPoolPersonIds": ["wang", "chen", "nanjing"],
+      "commonPoolPersonIds": [
+        "wang",
+        "chen",
+        "nanjing"
+      ],
       "openingCapitalCny": {
         "wang": 14136.37,
         "chen": 5000,
@@ -26,7 +53,7 @@
       },
       "commonPoolToUsStockDate": "2026-06-15",
       "commonPoolToUsStockCny": 15757.33,
-      "currentTotalAssetsCny": 22476.04,
+      "currentTotalAssetsCny": 24000,
       "specialPrincipalCny": {
         "garlicm": 10000,
         "sugar": 1400
@@ -34,10 +61,10 @@
     },
     "usStock": {
       "principalJpy": 850000,
-      "currentAssetJpy": 822997,
+      "currentAssetJpy": 927073,
       "earlyRealizedPnlJpy": -30488,
       "laterRealizedPnlJpy": -9862,
-      "floatingPnlJpy": -88360,
+      "floatingPnlJpy": -76626.76190476184,
       "jpyCnyRate": 0.042,
       "currentCapitalByPersonCny": {
         "wang": 8522.661987571342,
@@ -50,27 +77,100 @@
     "fund": {
       "ownerId": "wang",
       "principalCny": 5000,
-      "currentAssetCny": 4965.46
+      "currentAssetCny": 6947.99
     }
   },
   "dailyBalances": [
-    { "id": "d-2026-06-01", "date": "2026-06-01", "ashareProfitCny": -1035 },
-    { "id": "d-2026-06-02", "date": "2026-06-02", "ashareProfitCny": 267 },
-    { "id": "d-2026-06-03", "date": "2026-06-03", "ashareProfitCny": -1272 },
-    { "id": "d-2026-06-04", "date": "2026-06-04", "ashareProfitCny": 1134 },
-    { "id": "d-2026-06-05", "date": "2026-06-05", "ashareProfitCny": -1202 },
-    { "id": "d-2026-06-08", "date": "2026-06-08", "ashareProfitCny": -674 },
-    { "id": "d-2026-06-09", "date": "2026-06-09", "ashareProfitCny": 563 },
-    { "id": "d-2026-06-10", "date": "2026-06-10", "ashareProfitCny": -127 },
-    { "id": "d-2026-06-11", "date": "2026-06-11", "ashareProfitCny": -2875 },
-    { "id": "d-2026-06-12", "date": "2026-06-12", "ashareProfitCny": -1529 },
-    { "id": "d-2026-06-15", "date": "2026-06-15", "ashareProfitCny": 1811 },
-    { "id": "d-2026-06-16", "date": "2026-06-16", "ashareProfitCny": 1669 },
-    { "id": "d-2026-06-17", "date": "2026-06-17", "ashareProfitCny": 118 },
-    { "id": "d-2026-06-18", "date": "2026-06-18", "ashareProfitCny": -270 },
-    { "id": "d-2026-06-22", "date": "2026-06-22", "ashareProfitCny": 1432 },
-    { "id": "d-2026-06-23", "date": "2026-06-23", "ashareProfitCny": -301 },
-    { "id": "d-2026-06-24", "date": "2026-06-24", "ashareProfitCny": 1188 }
+    {
+      "id": "d-2026-06-01",
+      "date": "2026-06-01",
+      "ashareProfitCny": -1035
+    },
+    {
+      "id": "d-2026-06-02",
+      "date": "2026-06-02",
+      "ashareProfitCny": 267
+    },
+    {
+      "id": "d-2026-06-03",
+      "date": "2026-06-03",
+      "ashareProfitCny": -1272
+    },
+    {
+      "id": "d-2026-06-04",
+      "date": "2026-06-04",
+      "ashareProfitCny": 1134
+    },
+    {
+      "id": "d-2026-06-05",
+      "date": "2026-06-05",
+      "ashareProfitCny": -1202
+    },
+    {
+      "id": "d-2026-06-08",
+      "date": "2026-06-08",
+      "ashareProfitCny": -674
+    },
+    {
+      "id": "d-2026-06-09",
+      "date": "2026-06-09",
+      "ashareProfitCny": 563
+    },
+    {
+      "id": "d-2026-06-10",
+      "date": "2026-06-10",
+      "ashareProfitCny": -127
+    },
+    {
+      "id": "d-2026-06-11",
+      "date": "2026-06-11",
+      "ashareProfitCny": -2875
+    },
+    {
+      "id": "d-2026-06-12",
+      "date": "2026-06-12",
+      "ashareProfitCny": -1529
+    },
+    {
+      "id": "d-2026-06-15",
+      "date": "2026-06-15",
+      "ashareProfitCny": 1811
+    },
+    {
+      "id": "d-2026-06-16",
+      "date": "2026-06-16",
+      "ashareProfitCny": 1669
+    },
+    {
+      "id": "d-2026-06-17",
+      "date": "2026-06-17",
+      "ashareProfitCny": 118
+    },
+    {
+      "id": "d-2026-06-18",
+      "date": "2026-06-18",
+      "ashareProfitCny": -270
+    },
+    {
+      "id": "d-2026-06-22",
+      "date": "2026-06-22",
+      "ashareProfitCny": 1432
+    },
+    {
+      "id": "d-2026-06-23",
+      "date": "2026-06-23",
+      "ashareProfitCny": -301
+    },
+    {
+      "id": "d-2026-06-24",
+      "date": "2026-06-24",
+      "ashareProfitCny": 1188
+    },
+    {
+      "id": "d-2026-06-25",
+      "date": "2026-06-25",
+      "ashareProfitCny": 1523.9599999999991
+    }
   ],
   "dailySnapshots": [
     {
@@ -113,18 +213,106 @@
         "withdrawalCny": 0,
         "endingAssetsCny": 4985.46
       }
+    },
+    {
+      "date": "2026-06-25",
+      "aShare": {
+        "externalDepositCny": 0,
+        "externalWithdrawalCny": 0,
+        "transferInCny": 0,
+        "transferOutCny": 0,
+        "endingAssetsCny": 24000
+      },
+      "usStock": {
+        "externalDepositJpy": 0,
+        "externalWithdrawalJpy": 0,
+        "transferInJpy": 0,
+        "transferOutJpy": 0,
+        "endingAssetsJpy": 927073,
+        "jpyToCnyRate": 0.042
+      },
+      "fund": {
+        "externalDepositCny": 1500,
+        "externalWithdrawalCny": 0,
+        "transferInCny": 0,
+        "transferOutCny": 0,
+        "endingAssetsCny": 6947.99
+      }
     }
   ],
   "flows": [
-    { "id": "f-2026-06-15-wang-plus", "date": "2026-06-15", "asset": "ashare", "personId": "wang", "amountCny": 6000, "timing": "pre" },
-    { "id": "f-2026-06-16-wang-minus", "date": "2026-06-16", "asset": "ashare", "personId": "wang", "amountCny": -6000, "timing": "pre" },
-    { "id": "f-2026-06-16-wang-plus", "date": "2026-06-16", "asset": "ashare", "personId": "wang", "amountCny": 10000, "timing": "pre" },
-    { "id": "f-2026-06-16-common-us", "date": "2026-06-16", "asset": "ashare", "personId": "common", "amountCny": -7878.665, "timing": "pre" },
-    { "id": "f-2026-06-17-wang-minus", "date": "2026-06-17", "asset": "ashare", "personId": "wang", "amountCny": -3300, "timing": "pre" },
-    { "id": "f-2026-06-17-common-us", "date": "2026-06-17", "asset": "ashare", "personId": "common", "amountCny": -7878.665, "timing": "pre" },
-    { "id": "f-2026-06-17-garlicm-plus", "date": "2026-06-17", "asset": "ashare", "personId": "garlicm", "amountCny": 9000, "timing": "pre" },
-    { "id": "f-2026-06-22-wang-fund", "date": "2026-06-22", "asset": "ashare", "personId": "wang", "amountCny": -5000, "timing": "pre" },
-    { "id": "f-2026-06-22-garlicm-plus", "date": "2026-06-22", "asset": "ashare", "personId": "garlicm", "amountCny": 1000, "timing": "pre" }
+    {
+      "id": "f-2026-06-15-wang-plus",
+      "date": "2026-06-15",
+      "asset": "ashare",
+      "personId": "wang",
+      "amountCny": 6000,
+      "timing": "pre"
+    },
+    {
+      "id": "f-2026-06-16-wang-minus",
+      "date": "2026-06-16",
+      "asset": "ashare",
+      "personId": "wang",
+      "amountCny": -6000,
+      "timing": "pre"
+    },
+    {
+      "id": "f-2026-06-16-wang-plus",
+      "date": "2026-06-16",
+      "asset": "ashare",
+      "personId": "wang",
+      "amountCny": 10000,
+      "timing": "pre"
+    },
+    {
+      "id": "f-2026-06-16-common-us",
+      "date": "2026-06-16",
+      "asset": "ashare",
+      "personId": "common",
+      "amountCny": -7878.665,
+      "timing": "pre"
+    },
+    {
+      "id": "f-2026-06-17-wang-minus",
+      "date": "2026-06-17",
+      "asset": "ashare",
+      "personId": "wang",
+      "amountCny": -3300,
+      "timing": "pre"
+    },
+    {
+      "id": "f-2026-06-17-common-us",
+      "date": "2026-06-17",
+      "asset": "ashare",
+      "personId": "common",
+      "amountCny": -7878.665,
+      "timing": "pre"
+    },
+    {
+      "id": "f-2026-06-17-garlicm-plus",
+      "date": "2026-06-17",
+      "asset": "ashare",
+      "personId": "garlicm",
+      "amountCny": 9000,
+      "timing": "pre"
+    },
+    {
+      "id": "f-2026-06-22-wang-fund",
+      "date": "2026-06-22",
+      "asset": "ashare",
+      "personId": "wang",
+      "amountCny": -5000,
+      "timing": "pre"
+    },
+    {
+      "id": "f-2026-06-22-garlicm-plus",
+      "date": "2026-06-22",
+      "asset": "ashare",
+      "personId": "garlicm",
+      "amountCny": 1000,
+      "timing": "pre"
+    }
   ],
   "cashBalances": {
     "wang": 0,

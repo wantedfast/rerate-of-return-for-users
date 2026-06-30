@@ -1,5 +1,6 @@
 import express from "express";
 import crypto from "node:crypto";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { calculateAll } from "../src/shared/calculations.js";
 import { InvestmentDataValidationError, validateInvestmentData } from "../src/shared/investmentData.js";
@@ -85,6 +86,22 @@ export function createApp(options = {}) {
   app.get("/api/health", (_request, response) => {
     response.json({ ok: true });
   });
+
+  const distDirectory = fileURLToPath(new URL("../dist", import.meta.url));
+  const basePath = (process.env.BASE_PATH ?? "").replace(/\/+$/, "");
+  app.use(express.static(distDirectory));
+  if (basePath) {
+    app.use(basePath, express.static(distDirectory));
+  }
+  app.get(/^\/($|admin$)/, (_request, response) => {
+    response.sendFile(path.join(distDirectory, "index.html"));
+  });
+  if (basePath) {
+    const escapedBasePath = basePath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    app.get(new RegExp(`^${escapedBasePath}\\/($|admin$)`), (_request, response) => {
+      response.sendFile(path.join(distDirectory, "index.html"));
+    });
+  }
 
   app.use((error, _request, response, _next) => {
     if (error instanceof InvestmentDataValidationError) {

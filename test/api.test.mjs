@@ -46,7 +46,7 @@ test("user summary endpoint only returns the authenticated participant and rejec
   try {
     const auth = await login(server.baseUrl, {
       username: "wang",
-      password: "wang123",
+      password: "589602",
       scope: "user"
     });
 
